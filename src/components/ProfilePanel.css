@@ -1,0 +1,682 @@
+/* =========================================
+   BOOKNEST — PROFILE
+   Profile-specific styles only
+   ========================================= */
+
+.profile-page {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 34px 42px 70px;
+  color: #302b27;
+}
+
+
+/* =========================================
+   PROFILE HEADER
+   ========================================= */
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 10px 0 34px;
+  border-bottom: 1px solid rgba(48, 43, 39, 0.1);
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-avatar {
+  width: 126px;
+  height: 126px;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+  border: 5px solid #f8f5ef;
+  box-shadow: 0 7px 25px rgba(57, 45, 35, 0.12);
+}
+
+.profile-edit-avatar {
+  position: absolute;
+  right: 2px;
+  bottom: 3px;
+
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #302b27;
+  color: #fffaf2;
+
+  cursor: pointer;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+
+  transition: transform 0.2s ease;
+}
+
+.profile-edit-avatar:hover {
+  transform: scale(1.08);
+}
+
+.profile-intro {
+  flex: 1;
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.profile-eyebrow,
+.profile-section-kicker {
+  margin: 0 0 7px;
+
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+
+  color: #8a7666;
+}
+
+.profile-name-row h1 {
+  margin: 0;
+
+  font-family: "Playfair Display", Georgia, serif;
+
+  font-size: clamp(36px, 5vw, 52px);
+  line-height: 0.95;
+
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+
+.profile-bio {
+  margin: 17px 0 15px;
+
+  color: #6f655d;
+
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.profile-meta {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.profile-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #8b8179;
+  font-size: 12px;
+}
+
+.profile-edit-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 9px 13px;
+
+  border: 1px solid rgba(48, 43, 39, 0.16);
+  border-radius: 999px;
+
+  background: transparent;
+  color: #403933;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.profile-edit-button:hover {
+  background: #302b27;
+  color: #fffaf2;
+  border-color: #302b27;
+}
+
+
+/* =========================================
+   PROFILE STATS
+   ========================================= */
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 1px;
+
+  margin: 28px 0 42px;
+
+  background: rgba(48, 43, 39, 0.09);
+
+  border: 1px solid rgba(48, 43, 39, 0.09);
+  border-radius: 16px;
+
+  overflow: hidden;
+}
+
+.profile-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-height: 84px;
+
+  padding: 15px 20px;
+
+  background: #faf8f3;
+}
+
+.profile-stat svg {
+  color: #9b806b;
+  stroke-width: 1.6;
+}
+
+.profile-stat strong {
+  display: block;
+
+  font-family: "Playfair Display", Georgia, serif;
+
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.profile-stat span {
+  display: block;
+
+  margin-top: 5px;
+
+  color: #91867e;
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+
+/* =========================================
+   MAIN CONTENT
+   ========================================= */
+
+.profile-content {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.65fr)
+    minmax(280px, 0.9fr);
+
+  gap: 42px;
+}
+
+.profile-main-column,
+.profile-side-column {
+  min-width: 0;
+}
+
+.profile-section {
+  margin-bottom: 45px;
+}
+
+.profile-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 19px;
+}
+
+.profile-section-heading.compact {
+  margin-bottom: 20px;
+}
+
+.profile-section-heading h2,
+.profile-mini-card h2 {
+  margin: 0;
+
+  font-family: "Playfair Display", Georgia, serif;
+
+  font-size: 26px;
+  font-weight: 500;
+
+  letter-spacing: -0.02em;
+}
+
+.profile-section-note {
+  padding-bottom: 3px;
+
+  color: #a0958d;
+
+  font-size: 11px;
+  font-style: italic;
+}
+
+.profile-text-button {
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #8a705e;
+
+  font-size: 11px;
+
+  cursor: pointer;
+
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+
+/* =========================================
+   FAVORITE GENRES
+   ========================================= */
+
+.genre-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.genre-pill {
+  padding: 9px 14px;
+
+  border: 1px solid rgba(138, 118, 102, 0.2);
+  border-radius: 999px;
+
+  background: #f7f2ea;
+
+  color: #66584e;
+
+  font-size: 12px;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.genre-pill:hover {
+  transform: translateY(-2px);
+  background: #eee5d9;
+}
+
+
+/* =========================================
+   RECENT REVIEWS
+   ========================================= */
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.review-card {
+  padding: 18px 19px 15px;
+
+  border: 1px solid rgba(48, 43, 39, 0.09);
+  border-radius: 14px;
+
+  background: #faf8f4;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.review-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 24px rgba(63, 48, 36, 0.07);
+}
+
+.review-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.review-card h3,
+.hyped-book h3,
+.currently-reading-profile h3 {
+  margin: 0;
+
+  font-family: "Playfair Display", Georgia, serif;
+
+  font-weight: 500;
+  font-size: 17px;
+}
+
+.review-card-top p,
+.hyped-book p,
+.currently-reading-profile p {
+  margin: 3px 0 0;
+
+  color: #93877d;
+
+  font-size: 11px;
+}
+
+.profile-rating {
+  display: flex;
+  gap: 2px;
+
+  padding-top: 2px;
+
+  color: #a88162;
+}
+
+.review-text {
+  max-width: 720px;
+
+  margin: 13px 0 12px;
+
+  color: #665d56;
+
+  font-family: Georgia, serif;
+
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.review-footer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #aaa098;
+
+  font-size: 9px;
+
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+
+/* =========================================
+   RIGHT COLUMN
+   ========================================= */
+
+.profile-side-column {
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.profile-mini-card {
+  padding: 21px;
+
+  border: 1px solid rgba(48, 43, 39, 0.09);
+  border-radius: 16px;
+
+  background: #faf8f3;
+}
+
+
+/* =========================================
+   CURRENTLY READING
+   ========================================= */
+
+.currently-reading-profile {
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+
+  margin-top: 20px;
+}
+
+.mini-book-cover {
+  position: relative;
+
+  width: 62px;
+  height: 91px;
+
+  flex-shrink: 0;
+
+  overflow: hidden;
+
+  border-radius: 3px 6px 6px 3px;
+
+  background: #695246;
+
+  box-shadow:
+    3px 5px 12px rgba(48, 36, 29, 0.15);
+}
+
+.mini-book-spine {
+  position: absolute;
+
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+  width: 7px;
+
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.mini-book-title {
+  position: absolute;
+
+  inset: 17px 7px 10px 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  color: #f7eee3;
+
+  font-family: Georgia, serif;
+
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.reading-progress-profile {
+  display: inline-block;
+
+  margin-top: 12px;
+
+  color: #927660;
+
+  font-size: 10px;
+}
+
+
+/* =========================================
+   HYPED BOOKS
+   ========================================= */
+
+.hyped-books {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.hyped-book {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.hyped-book img {
+  width: 43px;
+  height: 64px;
+
+  object-fit: cover;
+
+  flex-shrink: 0;
+
+  border-radius: 3px;
+
+  box-shadow:
+    2px 3px 8px rgba(48, 36, 29, 0.13);
+}
+
+.hyped-book h3 {
+  font-size: 14px;
+}
+
+.hyped-book p {
+  font-size: 10px;
+}
+
+
+/* =========================================
+   QUOTE
+   ========================================= */
+
+.profile-note-card {
+  position: relative;
+
+  overflow: hidden;
+
+  padding: 27px 24px 25px;
+
+  border-radius: 16px;
+
+  background: #eee5d8;
+}
+
+.note-decoration {
+  position: absolute;
+
+  top: -15px;
+  left: 13px;
+
+  color: rgba(120, 94, 74, 0.12);
+
+  font-family: Georgia, serif;
+
+  font-size: 105px;
+  line-height: 1;
+}
+
+.profile-note-card p {
+  position: relative;
+
+  margin: 0 0 12px;
+
+  color: #5e5147;
+
+  font-family: Georgia, serif;
+
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.profile-note-card span {
+  color: #927f6e;
+
+  font-size: 10px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 850px) {
+
+  .profile-page {
+    padding: 28px 24px 55px;
+  }
+
+  .profile-content {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .profile-side-column {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    align-items: start;
+  }
+
+  .profile-note-card {
+    grid-column: span 2;
+  }
+}
+
+
+@media (max-width: 650px) {
+
+  .profile-page {
+    padding: 24px 17px 45px;
+  }
+
+  .profile-hero {
+    align-items: flex-start;
+
+    gap: 18px;
+  }
+
+  .profile-avatar {
+    width: 90px;
+    height: 90px;
+  }
+
+  .profile-name-row {
+    display: block;
+  }
+
+  .profile-name-row h1 {
+    font-size: 35px;
+  }
+
+  .profile-edit-button {
+    margin-top: 13px;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .profile-side-column {
+    display: flex;
+  }
+
+  .profile-note-card {
+    grid-column: auto;
+  }
+
+  .profile-section-note {
+    display: none;
+  }
+}

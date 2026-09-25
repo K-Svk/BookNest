@@ -1,3 +1,4 @@
+import ProfilePanel from './components/ProfilePanel';
 import React, { useMemo, useState } from 'react';
 import { books } from './data/books';
 import Topbar from './components/Topbar';
@@ -25,9 +26,7 @@ function Shelf({ title, subtitle, items, onOpen, reverse = false }) {
       </div>
 
       <div className="shelf-viewport">
-        <div
-          className={`shelf-row ${reverse ? 'carousel-reverse' : ''}`}
-        >
+        <div className={`shelf-row ${reverse ? 'carousel-reverse' : ''}`}>
           {carouselItems.map((book, index) => (
             <BookCard
               key={`${book.id}-${index}`}
@@ -65,10 +64,7 @@ function CurrentlyReading({ reading }) {
       <div className="reading-content">
         <div className="reading-cover-wrap">
           <div className="reading-cover">
-            <img
-              src={book.cover}
-              alt={book.title}
-            />
+            <img src={book.cover} alt={book.title} />
 
             <div className="reading-bookmark"></div>
           </div>
@@ -87,9 +83,7 @@ function CurrentlyReading({ reading }) {
         </div>
 
         <div className="reading-info">
-          <p className="reading-quote">
-            “{book.quote}”
-          </p>
+          <p className="reading-quote">"{book.quote}"</p>
 
           <div className="reading-book">
             <strong>{book.title}</strong>
@@ -124,45 +118,42 @@ export default function App() {
     so they can never appear in TBR or Already Read.
   */
   const [currentlyReading] = useState(() => {
-    const pool = books.filter(
-      (book) => book.status === 'currently'
-    );
+    const pool = books.filter((book) => book.status === 'currently');
 
     if (!pool.length) return null;
 
-    const book =
-      pool[Math.floor(Math.random() * pool.length)];
+    const book = pool[Math.floor(Math.random() * pool.length)];
 
     const totalPages = book.pages || 300;
 
-    const page =
-      Math.floor(
-        Math.random() * (totalPages - 40)
-      ) + 30;
+    // Clamp so short books never produce a negative or out-of-range page.
+    const upperBound = Math.max(totalPages - 40, 1);
+    const page = Math.min(
+      totalPages - 1,
+      Math.floor(Math.random() * upperBound) + 30
+    );
 
     return {
       book,
-      page
+      page: Math.max(page, 1)
     };
   });
 
   const filtered = useMemo(
     () =>
-      books.filter((b) =>
-        `${b.title} ${b.author} ${b.genre}`
-          .toLowerCase()
-          .includes(query.toLowerCase())
+      books.filter(
+        (b) =>
+          `${b.title} ${b.author} ${b.genre}`
+            .toLowerCase()
+            .includes(query.toLowerCase()) &&
+          selectedGenres.includes(b.genre)
       ),
-    [query]
+    [query, selectedGenres]
   );
 
-  const tbr = filtered.filter(
-    (b) => b.status === 'tbr'
-  );
+  const tbr = filtered.filter((b) => b.status === 'tbr');
 
-  const read = filtered.filter(
-    (b) => b.status === 'read'
-  );
+  const read = filtered.filter((b) => b.status === 'read');
 
   const totalBooks = books.filter(
     (book) => book.status !== 'currently'
@@ -189,40 +180,7 @@ export default function App() {
 
       <main>
         {section === 'profile' ? (
-          <div className="simple-page">
-            <p className="eyebrow">Your account</p>
-
-            <h1>Ayvarhs</h1>
-
-            <p className="muted">
-              A quiet corner for your reading life.
-            </p>
-
-            <div className="stat-grid">
-              <div>
-                <strong>{totalBooks}</strong>
-                <span>Books tracked</span>
-              </div>
-
-              <div>
-                <strong>
-                  {books.filter(
-                    (b) => b.status === 'tbr'
-                  ).length}
-                </strong>
-                <span>On TBR</span>
-              </div>
-
-              <div>
-                <strong>
-                  {books.filter(
-                    (b) => b.status === 'read'
-                  ).length}
-                </strong>
-                <span>Read</span>
-              </div>
-            </div>
-          </div>
+          <ProfilePanel />
         ) : section === 'read' ? (
           <Shelf
             title="Books I've read"
@@ -241,9 +199,7 @@ export default function App() {
           <>
             <div className="hero">
               <div className="hero-copy">
-                <p className="eyebrow">
-                  Your reading space
-                </p>
+                <p className="eyebrow">Your reading space</p>
 
                 <h1>
                   A shelf for every story
@@ -252,9 +208,8 @@ export default function App() {
                 </h1>
 
                 <p>
-                  Keep your TBR close, remember what
-                  you've loved, and find your next
-                  favourite book.
+                  Keep your TBR close, remember what you've loved, and
+                  find your next favourite book.
                 </p>
 
                 <div className="hero-stats">
@@ -270,18 +225,14 @@ export default function App() {
 
                   <div>
                     <strong>
-                      {books.filter(
-                        (b) => b.status === 'read'
-                      ).length}
+                      {books.filter((b) => b.status === 'read').length}
                     </strong>
                     <span>stories finished</span>
                   </div>
                 </div>
               </div>
 
-              <CurrentlyReading
-                reading={currentlyReading}
-              />
+              <CurrentlyReading reading={currentlyReading} />
             </div>
 
             <Shelf
@@ -302,12 +253,7 @@ export default function App() {
         )}
       </main>
 
-      {modal && (
-        <BookModal
-          book={modal}
-          onClose={() => setModal(null)}
-        />
-      )}
+      {modal && <BookModal book={modal} onClose={() => setModal(null)} />}
 
       {settings && (
         <>

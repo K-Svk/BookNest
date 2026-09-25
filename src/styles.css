@@ -2279,3 +2279,987 @@ main {
     transition: none;
   }
 }
+/* =========================================================
+   PROFILE PAGE
+========================================================= */
+
+.profile-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+}
+
+
+/* =========================================================
+   PROFILE HEADER
+========================================================= */
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 60px;
+  padding: 20px 0 55px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-header-left {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+
+/* Cat avatar */
+
+.profile-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-avatar {
+  width: 148px;
+  height: 148px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  padding: 5px;
+  background: #fffdf8;
+}
+
+.avatar-paw {
+  position: absolute;
+  right: -5px;
+  bottom: 4px;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+
+  font-size: 17px;
+}
+
+
+/* Profile text */
+
+.profile-intro {
+  max-width: 680px;
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 5px;
+}
+
+.profile-name-row h1 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(48px, 5vw, 70px);
+  line-height: 0.95;
+  letter-spacing: -2.5px;
+}
+
+.profile-bio {
+  max-width: 620px;
+  margin: 18px 0 14px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.profile-meta {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.profile-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-dot {
+  opacity: 0.4;
+}
+
+
+/* Edit button */
+
+.edit-profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 9px 13px;
+
+  border: 1px solid var(--border);
+  border-radius: 999px;
+
+  background: transparent;
+  color: var(--ink);
+
+  font-family: inherit;
+  font-size: 11px;
+
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.edit-profile-btn:hover {
+  background: var(--paper);
+  transform: translateY(-1px);
+}
+
+
+/* Quote */
+
+.profile-header-note {
+  width: 260px;
+  padding: 20px 0 5px;
+
+  color: var(--muted);
+  text-align: right;
+}
+
+.profile-header-note svg {
+  opacity: 0.45;
+  margin-bottom: 10px;
+}
+
+.profile-header-note p {
+  margin: 0 0 8px;
+
+  font-family: "Playfair Display", serif;
+  font-size: 17px;
+  line-height: 1.55;
+  font-style: italic;
+}
+
+.profile-header-note span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+}
+
+
+/* =========================================================
+   PROFILE STATS
+========================================================= */
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  margin: 35px 0 70px;
+
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-stat {
+  min-height: 105px;
+  padding: 25px 30px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  border-right: 1px solid var(--border);
+}
+
+.profile-stat:last-child {
+  border-right: none;
+}
+
+.profile-stat strong {
+  font-size: 29px;
+  font-weight: 600;
+  letter-spacing: -1px;
+}
+
+.profile-stat span {
+  margin-top: 7px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+}
+
+
+/* =========================================================
+   SECTION HEADINGS
+========================================================= */
+
+.profile-section {
+  margin-bottom: 78px;
+}
+
+.profile-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+
+  margin-bottom: 27px;
+}
+
+.profile-section-heading h2 {
+  margin: 5px 0 0;
+
+  font-family: "Playfair Display", serif;
+  font-size: 31px;
+  font-weight: 500;
+  letter-spacing: -0.8px;
+}
+
+.section-script {
+  font-family: "Playfair Display", serif;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.section-count {
+  color: var(--muted);
+
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+}
+
+
+/* =========================================================
+   CURRENTLY READING
+========================================================= */
+
+.profile-current {
+  margin-bottom: 75px;
+}
+
+.current-reading-card {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 38px;
+
+  min-height: 310px;
+  padding: 32px;
+
+  background: #ebe7dc;
+  border: 1px solid var(--border);
+}
+
+.current-reading-cover-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.current-reading-cover {
+  display: block;
+
+  width: 155px;
+  height: 225px;
+
+  object-fit: cover;
+
+  box-shadow:
+    8px 10px 0 rgba(45, 42, 36, 0.07);
+}
+
+.reading-bookmark {
+  position: absolute;
+  top: -1px;
+  right: 15px;
+
+  padding: 9px 7px 15px;
+
+  background: #282722;
+  color: #fff;
+
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  writing-mode: vertical-rl;
+}
+
+.current-reading-info {
+  max-width: 630px;
+}
+
+.current-reading-info h3 {
+  margin: 7px 0 4px;
+
+  font-family: "Playfair Display", serif;
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.current-author {
+  margin: 0 0 25px;
+
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.reading-progress {
+  width: 100%;
+  height: 3px;
+
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.reading-progress-fill {
+  height: 100%;
+  background: var(--ink);
+}
+
+.reading-progress-meta {
+  display: flex;
+  justify-content: space-between;
+
+  margin-top: 8px;
+
+  color: var(--muted);
+
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.current-quote {
+  max-width: 540px;
+  margin: 25px 0 0;
+
+  font-family: "Playfair Display", serif;
+  font-size: 17px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+
+/* =========================================================
+   FAVORITE GENRES
+========================================================= */
+
+.genre-cloud {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.3fr 0.9fr 1.1fr;
+  gap: 12px;
+}
+
+.genre-card {
+  min-height: 130px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 20px;
+
+  border: 1px solid var(--border);
+  background: #fffdf8;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.genre-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 5px 7px 0 rgba(0, 0, 0, 0.04);
+}
+
+.genre-card span {
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+}
+
+.genre-card small {
+  color: var(--muted);
+
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.genre-card-1 {
+  transform: rotate(-1deg);
+}
+
+.genre-card-2 {
+  transform: rotate(0.7deg);
+}
+
+.genre-card-3 {
+  transform: rotate(-0.5deg);
+}
+
+.genre-card-4 {
+  transform: rotate(1deg);
+}
+
+.genre-card-5 {
+  transform: rotate(-0.7deg);
+}
+
+
+/* =========================================================
+   RECENT REVIEWS
+========================================================= */
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.review-card {
+  display: flex;
+  gap: 19px;
+
+  min-height: 205px;
+  padding: 18px;
+
+  background: #fffdf8;
+  border: 1px solid var(--border);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 5px 7px 0 rgba(0, 0, 0, 0.035);
+}
+
+.review-book {
+  width: 72px;
+  flex-shrink: 0;
+
+  cursor: pointer;
+}
+
+.review-book img {
+  display: block;
+
+  width: 72px;
+  height: 108px;
+
+  object-fit: cover;
+}
+
+.review-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.review-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.review-card-top h3 {
+  margin: 0;
+
+  font-family: "Playfair Display", serif;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.review-card-top p {
+  margin: 4px 0 0;
+
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.review-date {
+  flex-shrink: 0;
+
+  color: var(--muted);
+
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.review-stars {
+  display: flex;
+  gap: 2px;
+
+  margin: 13px 0 10px;
+
+  color: #8a7554;
+}
+
+.review-text {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-family: "Playfair Display", serif;
+  font-size: 13px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+
+/* =========================================================
+   HYPED BOOKS
+========================================================= */
+
+.hype-heading-icon {
+  width: 35px;
+  height: 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--border);
+  border-radius: 50%;
+
+  color: #8a7554;
+}
+
+.hyped-books {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+}
+
+.hyped-book {
+  cursor: pointer;
+}
+
+.hyped-cover-wrap {
+  position: relative;
+
+  overflow: hidden;
+
+  background: #ebe7dc;
+}
+
+.hyped-cover-wrap img {
+  display: block;
+
+  width: 100%;
+  height: 255px;
+
+  object-fit: cover;
+
+  transition: transform 350ms ease;
+}
+
+.hyped-book:hover .hyped-cover-wrap img {
+  transform: scale(1.035);
+}
+
+.hyped-badge {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 6px 9px;
+
+  background: rgba(255, 253, 248, 0.94);
+  border: 1px solid var(--border);
+
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hyped-book-info {
+  padding-top: 12px;
+}
+
+.hyped-book-info h3 {
+  margin: 0;
+
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.hyped-book-info p {
+  margin: 4px 0 10px;
+
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.hyped-book-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  color: var(--muted);
+
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+}
+
+
+/* =========================================================
+   READING PERSONALITY
+========================================================= */
+
+.reading-personality {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+
+  margin-top: 25px;
+  margin-bottom: 40px;
+
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.personality-copy {
+  padding: 55px 55px 55px 0;
+}
+
+.personality-copy h2 {
+  margin: 8px 0 18px;
+
+  font-family: "Playfair Display", serif;
+  font-size: 38px;
+  font-weight: 500;
+  line-height: 1.08;
+}
+
+.personality-copy h2 em {
+  font-weight: 400;
+}
+
+.personality-copy > p:last-child {
+  max-width: 550px;
+
+  color: var(--muted);
+
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.personality-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  border-left: 1px solid var(--border);
+}
+
+.personality-details div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 20px 0 20px 35px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.personality-details div:last-child {
+  border-bottom: none;
+}
+
+.personality-details span {
+  color: var(--muted);
+
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+}
+
+.personality-details strong {
+  font-family: "Playfair Display", serif;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   EDIT PROFILE
+========================================================= */
+
+.edit-profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 25px;
+
+  background: rgba(30, 29, 25, 0.28);
+}
+
+.edit-profile-panel {
+  width: min(500px, 100%);
+
+  padding: 30px;
+
+  background: var(--paper);
+  border: 1px solid var(--border);
+
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.12);
+}
+
+.edit-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 30px;
+}
+
+.edit-panel-header h2 {
+  margin: 5px 0 0;
+
+  font-family: "Playfair Display", serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.edit-profile-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  margin-bottom: 20px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.edit-profile-panel input,
+.edit-profile-panel textarea {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 12px 13px;
+
+  border: 1px solid var(--border);
+  outline: none;
+
+  background: #fffdf8;
+  color: var(--ink);
+
+  font-family: inherit;
+  font-size: 13px;
+
+  resize: vertical;
+}
+
+.edit-profile-panel input:focus,
+.edit-profile-panel textarea:focus {
+  border-color: #aaa398;
+}
+
+.edit-avatar-note {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin: 25px 0;
+  padding: 12px;
+
+  border: 1px solid var(--border);
+  background: #fffdf8;
+}
+
+.edit-avatar-note img {
+  width: 48px;
+  height: 48px;
+
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.edit-avatar-note div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-avatar-note strong {
+  font-size: 12px;
+}
+
+.edit-avatar-note span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.save-profile-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+.app.dark .profile-avatar {
+  background: #292824;
+}
+
+.app.dark .profile-stat,
+.app.dark .genre-card,
+.app.dark .review-card,
+.app.dark .hyped-cover-wrap,
+.app.dark .edit-profile-panel,
+.app.dark .edit-avatar-note,
+.app.dark .edit-profile-panel input,
+.app.dark .edit-profile-panel textarea {
+  background: #292824;
+}
+
+.app.dark .current-reading-card {
+  background: #292824;
+}
+
+.app.dark .edit-profile-overlay {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1050px) {
+
+  .profile-header {
+    align-items: flex-start;
+  }
+
+  .profile-header-note {
+    display: none;
+  }
+
+  .genre-cloud {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hyped-books {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .reading-personality {
+    grid-template-columns: 1fr;
+  }
+
+  .personality-copy {
+    padding-right: 0;
+  }
+
+  .personality-details {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .personality-details div {
+    padding-left: 0;
+  }
+}
+
+
+@media (max-width: 700px) {
+
+  .profile-header-left {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-name-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .profile-stat:nth-child(2) {
+    border-right: none;
+  }
+
+  .profile-stat:nth-child(1),
+  .profile-stat:nth-child(2) {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .current-reading-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .genre-cloud {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hyped-books {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .review-card {
+    flex-direction: column;
+  }
+
+  .review-book {
+    width: 85px;
+  }
+
+  .review-book img {
+    width: 85px;
+    height: 125px;
+  }
+
+  .personality-copy h2 {
+    font-size: 30px;
+  }
+}
