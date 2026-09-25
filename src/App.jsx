@@ -6,6 +6,11 @@ import BookCard from './components/BookCard';
 import BookModal from './components/BookModal';
 import SettingsPanel from './components/SettingsPanel';
 
+import LoginPage from './components/LoginPage';
+import GenreSelection from './components/GenreSelection';
+import BookRatingPage from './components/BookRatingPage';
+import RecommendationsPage from './components/RecommendationsPage';
+
 function Shelf({ title, subtitle, items, onOpen, reverse = false }) {
   /*
     Two identical copies create the seamless infinite loop.
@@ -26,7 +31,11 @@ function Shelf({ title, subtitle, items, onOpen, reverse = false }) {
       </div>
 
       <div className="shelf-viewport">
-        <div className={`shelf-row ${reverse ? 'carousel-reverse' : ''}`}>
+        <div
+          className={`shelf-row ${
+            reverse ? 'carousel-reverse' : ''
+          }`}
+        >
           {carouselItems.map((book, index) => (
             <BookCard
               key={`${book.id}-${index}`}
@@ -46,9 +55,13 @@ function CurrentlyReading({ reading }) {
   const { book, page } = reading;
 
   const totalPages = book.pages || 300;
+
   const progress = Math.min(
     100,
-    Math.max(1, Math.round((page / totalPages) * 100))
+    Math.max(
+      1,
+      Math.round((page / totalPages) * 100)
+    )
   );
 
   return (
@@ -64,7 +77,10 @@ function CurrentlyReading({ reading }) {
       <div className="reading-content">
         <div className="reading-cover-wrap">
           <div className="reading-cover">
-            <img src={book.cover} alt={book.title} />
+            <img
+              src={book.cover}
+              alt={book.title}
+            />
 
             <div className="reading-bookmark"></div>
           </div>
@@ -78,12 +94,16 @@ function CurrentlyReading({ reading }) {
 
           <div className="reading-progress-meta">
             <span>{progress}% through</span>
-            <span>{totalPages - page} pages left</span>
+            <span>
+              {totalPages - page} pages left
+            </span>
           </div>
         </div>
 
         <div className="reading-info">
-          <p className="reading-quote">"{book.quote}"</p>
+          <p className="reading-quote">
+            “{book.quote}”
+          </p>
 
           <div className="reading-book">
             <strong>{book.title}</strong>
@@ -114,46 +134,131 @@ export default function App() {
   ]);
 
   /*
-    Currently-reading books have their own status,
-    so they can never appear in TBR or Already Read.
+    =========================================
+    BOOKNEST ONBOARDING
+    =========================================
   */
+
+  const existingUser = localStorage.getItem(
+    'booknestUser'
+  );
+
+  const savedGenres = localStorage.getItem(
+    'booknestGenres'
+  );
+
+  const savedRatings = localStorage.getItem(
+    'booknestRatings'
+  );
+
+  const [onboardingStep, setOnboardingStep] = useState(() => {
+    if (!existingUser) {
+      return 'login';
+    }
+
+    if (!savedGenres) {
+      return 'genres';
+    }
+
+    if (!savedRatings) {
+      return 'ratings';
+    }
+
+    return 'complete';
+  });
+
+  const [onboardingGenres, setOnboardingGenres] =
+    useState(() => {
+      if (!savedGenres) return [];
+
+      try {
+        return JSON.parse(savedGenres);
+      } catch {
+        return [];
+      }
+    });
+
+  const [onboardingRatings, setOnboardingRatings] =
+    useState(() => {
+      if (!savedRatings) return {};
+
+      try {
+        return JSON.parse(savedRatings);
+      } catch {
+        return {};
+      }
+    });
+
+  const handleLoginComplete = (user) => {
+    setOnboardingStep('genres');
+  };
+
+  const handleGenresComplete = (genres) => {
+    setOnboardingGenres(genres);
+    setOnboardingStep('ratings');
+  };
+
+  const handleRatingsComplete = (ratings) => {
+    setOnboardingRatings(ratings);
+    setOnboardingStep('recommendations');
+  };
+
+  const finishOnboarding = () => {
+    setOnboardingStep('complete');
+  };
+
+  /*
+    =========================================
+    CURRENTLY READING
+    =========================================
+  */
+
   const [currentlyReading] = useState(() => {
-    const pool = books.filter((book) => book.status === 'currently');
+    const pool = books.filter(
+      (book) => book.status === 'currently'
+    );
 
     if (!pool.length) return null;
 
-    const book = pool[Math.floor(Math.random() * pool.length)];
+    const book =
+      pool[Math.floor(Math.random() * pool.length)];
 
     const totalPages = book.pages || 300;
 
-    // Clamp so short books never produce a negative or out-of-range page.
-    const upperBound = Math.max(totalPages - 40, 1);
-    const page = Math.min(
-      totalPages - 1,
-      Math.floor(Math.random() * upperBound) + 30
-    );
+    const page =
+      Math.floor(
+        Math.random() * (totalPages - 40)
+      ) + 30;
 
     return {
       book,
-      page: Math.max(page, 1)
+      page
     };
   });
 
+  /*
+    =========================================
+    SEARCH
+    =========================================
+  */
+
   const filtered = useMemo(
     () =>
-      books.filter(
-        (b) =>
-          `${b.title} ${b.author} ${b.genre}`
-            .toLowerCase()
-            .includes(query.toLowerCase()) &&
-          selectedGenres.includes(b.genre)
+      books.filter((b) =>
+        `${b.title} ${b.author} ${b.genre}`
+          .toLowerCase()
+          .includes(query.toLowerCase())
       ),
-    [query, selectedGenres]
+    [query]
   );
 
-  const tbr = filtered.filter((b) => b.status === 'tbr');
+  const tbr = filtered.filter(
+    (b) => b.status === 'tbr'
+  );
 
-  const read = filtered.filter((b) => b.status === 'read');
+  const read = filtered.filter(
+    (b) => b.status === 'read'
+  );
 
   const totalBooks = books.filter(
     (book) => book.status !== 'currently'
@@ -164,8 +269,56 @@ export default function App() {
     setSettings(false);
   };
 
+  /*
+    =========================================
+    LOGIN / ONBOARDING SCREENS
+    =========================================
+  */
+
+  if (onboardingStep === 'login') {
+    return (
+      <LoginPage
+        onComplete={handleLoginComplete}
+      />
+    );
+  }
+
+  if (onboardingStep === 'genres') {
+    return (
+      <GenreSelection
+        onComplete={handleGenresComplete}
+      />
+    );
+  }
+
+  if (onboardingStep === 'ratings') {
+    return (
+      <BookRatingPage
+        onComplete={handleRatingsComplete}
+      />
+    );
+  }
+
+  if (onboardingStep === 'recommendations') {
+    return (
+      <RecommendationsPage
+        genres={onboardingGenres}
+        ratings={onboardingRatings}
+        onFinish={finishOnboarding}
+      />
+    );
+  }
+
+  /*
+    =========================================
+    EXISTING BOOKNEST APP
+    NOTHING BELOW THIS POINT HAS BEEN CHANGED
+    =========================================
+  */
+
   return (
     <div className={`app ${theme}`}>
+
       <Topbar
         query={query}
         setQuery={setQuery}
@@ -179,8 +332,10 @@ export default function App() {
       />
 
       <main>
+
         {section === 'profile' ? (
           <ProfilePanel />
+
         ) : section === 'read' ? (
           <Shelf
             title="Books I've read"
@@ -188,6 +343,7 @@ export default function App() {
             items={read}
             onOpen={setModal}
           />
+
         ) : section === 'tbr' ? (
           <Shelf
             title="My TBR"
@@ -195,44 +351,70 @@ export default function App() {
             items={tbr}
             onOpen={setModal}
           />
+
         ) : (
           <>
             <div className="hero">
+
               <div className="hero-copy">
-                <p className="eyebrow">Your reading space</p>
+
+                <p className="eyebrow">
+                  Your reading space
+                </p>
 
                 <h1>
                   A shelf for every story
                   <br />
-                  <em>you haven't met yet.</em>
+                  <em>
+                    you haven't met yet.
+                  </em>
                 </h1>
 
                 <p>
-                  Keep your TBR close, remember what you've loved, and
-                  find your next favourite book.
+                  Keep your TBR close, remember what
+                  you've loved, and find your next
+                  favourite book.
                 </p>
 
                 <div className="hero-stats">
+
                   <div>
                     <strong>{totalBooks}</strong>
-                    <span>books in your library</span>
+                    <span>
+                      books in your library
+                    </span>
                   </div>
 
                   <div>
                     <strong>{tbr.length}</strong>
-                    <span>waiting to be read</span>
+                    <span>
+                      waiting to be read
+                    </span>
                   </div>
 
                   <div>
                     <strong>
-                      {books.filter((b) => b.status === 'read').length}
+                      {
+                        books.filter(
+                          (b) =>
+                            b.status === 'read'
+                        ).length
+                      }
                     </strong>
-                    <span>stories finished</span>
+
+                    <span>
+                      stories finished
+                    </span>
                   </div>
+
                 </div>
+
               </div>
 
-              <CurrentlyReading reading={currentlyReading} />
+              <CurrentlyReading
+                reading={currentlyReading}
+              />
+
             </div>
 
             <Shelf
@@ -251,9 +433,15 @@ export default function App() {
             />
           </>
         )}
+
       </main>
 
-      {modal && <BookModal book={modal} onClose={() => setModal(null)} />}
+      {modal && (
+        <BookModal
+          book={modal}
+          onClose={() => setModal(null)}
+        />
+      )}
 
       {settings && (
         <>
@@ -266,11 +454,16 @@ export default function App() {
             theme={theme}
             setTheme={setTheme}
             selectedGenres={selectedGenres}
-            setSelectedGenres={setSelectedGenres}
-            onClose={() => setSettings(false)}
+            setSelectedGenres={
+              setSelectedGenres
+            }
+            onClose={() =>
+              setSettings(false)
+            }
           />
         </>
       )}
+
     </div>
   );
 }

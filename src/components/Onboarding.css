@@ -1,0 +1,488 @@
+/* =========================================
+   BOOKNEST — LOGIN & ONBOARDING
+   New onboarding styles only
+   ========================================= */
+
+.onboarding-page {
+  min-height: 100vh;
+  background: #f5f1e9;
+  color: #302b27;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 35px;
+  box-sizing: border-box;
+}
+
+.onboarding-paper {
+  position: relative;
+  width: min(1050px, 100%);
+  min-height: 650px;
+  display: flex;
+  overflow: hidden;
+  background: #faf8f3;
+  border: 1px solid rgba(48, 43, 39, 0.1);
+  box-shadow: 0 20px 60px rgba(53, 42, 33, 0.08);
+}
+
+/* BRAND */
+
+.onboarding-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.brand-mark {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #302b27;
+  color: #faf8f3;
+  font-family: Georgia, serif;
+  font-size: 15px;
+}
+
+/* LOGIN */
+
+.onboarding-content {
+  width: 53%;
+  padding: 65px 70px;
+  position: relative;
+  z-index: 2;
+}
+
+.onboarding-content .onboarding-brand {
+  margin-bottom: 75px;
+}
+
+.onboarding-eyebrow {
+  margin: 0 0 10px;
+  color: #947c69;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+}
+
+.onboarding-content h1,
+.genre-heading h1,
+.rating-heading h1,
+.recommendation-heading h1 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(39px, 5vw, 58px);
+  line-height: 0.98;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.onboarding-content h1 em,
+.genre-heading h1 em,
+.rating-heading h1 em,
+.recommendation-heading h1 em {
+  color: #947864;
+  font-weight: 400;
+}
+
+.onboarding-description {
+  max-width: 420px;
+  margin: 22px 0 30px;
+  color: #766b63;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 380px;
+}
+
+.login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-form label span {
+  color: #665b53;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.login-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 13px;
+  border: 1px solid rgba(48, 43, 39, 0.13);
+  border-radius: 8px;
+  outline: none;
+  background: #f5f1e9;
+  color: #302b27;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.login-form input:focus {
+  border-color: #927762;
+  background: #faf8f3;
+}
+
+.login-form input::placeholder {
+  color: #aaa098;
+}
+
+.onboarding-primary-button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 19px;
+  background: #302b27;
+  color: #faf8f3;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.login-form .onboarding-primary-button {
+  margin-top: 5px;
+}
+
+.onboarding-primary-button:hover {
+  transform: translateY(-2px);
+  background: #493f38;
+}
+
+.onboarding-primary-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.onboarding-switch {
+  margin-top: 17px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #927762;
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.onboarding-decoration {
+  position: absolute;
+  right: -20px;
+  bottom: -65px;
+  font-family: Georgia, serif;
+  font-size: 280px;
+  line-height: 1;
+  color: rgba(148, 124, 105, 0.08);
+}
+
+/* =========================================
+   GENRE PAGE
+   ========================================= */
+
+.genre-page,
+.rating-page,
+.recommendation-page {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.genre-page .onboarding-brand,
+.rating-page .onboarding-brand,
+.recommendation-page .onboarding-brand {
+  margin-bottom: 55px;
+}
+
+.genre-heading {
+  margin-bottom: 35px;
+}
+
+.genre-heading > p:last-child,
+.rating-heading > p:last-child,
+.recommendation-heading > p:last-child {
+  max-width: 620px;
+  margin: 17px 0 0;
+  color: #766b63;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.genre-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 11px;
+}
+
+.genre-choice {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid rgba(48, 43, 39, 0.11);
+  border-radius: 10px;
+  background: #faf8f3;
+  color: #5e554e;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.genre-choice:hover {
+  border-color: #b29a84;
+  transform: translateY(-2px);
+}
+
+.genre-choice.selected {
+  background: #302b27;
+  border-color: #302b27;
+  color: #faf8f3;
+}
+
+.genre-check {
+  font-size: 13px;
+}
+
+.genre-bottom,
+.rating-bottom,
+.recommendation-bottom {
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(48, 43, 39, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.genre-bottom > span,
+.rating-bottom > span {
+  color: #968a81;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* =========================================
+   RATING PAGE
+   ========================================= */
+
+.rating-page-wrapper,
+.recommendation-page-wrapper {
+  align-items: flex-start;
+  padding-top: 45px;
+  padding-bottom: 60px;
+}
+
+.rating-heading {
+  margin-bottom: 34px;
+}
+
+.rating-book-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 22px 15px;
+}
+
+.rating-book-card {
+  min-width: 0;
+}
+
+.rating-cover-wrap {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: #e7ded2;
+  border-radius: 4px;
+  box-shadow: 3px 6px 14px rgba(48, 36, 29, 0.12);
+}
+
+.rating-book-cover {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.rating-book-info {
+  padding-top: 10px;
+}
+
+.rating-book-info h3 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.rating-book-info p {
+  margin: 4px 0 8px;
+  color: #93877d;
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 1px;
+}
+
+.rating-star {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #c8bdb3;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.rating-star:hover {
+  transform: scale(1.15);
+  color: #a88162;
+}
+
+.rating-star.active {
+  color: #a88162;
+}
+
+/* =========================================
+   RECOMMENDATIONS
+   ========================================= */
+
+.recommendation-heading {
+  margin-bottom: 38px;
+}
+
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px 20px;
+}
+
+.recommendation-card {
+  min-width: 0;
+}
+
+.recommendation-cover-wrap {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #e7ded2;
+  box-shadow: 4px 7px 16px rgba(48, 36, 29, 0.12);
+}
+
+.recommendation-cover {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.recommendation-info {
+  padding-top: 12px;
+}
+
+.recommendation-info h3 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.recommendation-info p {
+  margin: 4px 0 8px;
+  color: #93877d;
+  font-size: 10px;
+}
+
+.recommendation-genre {
+  display: inline-block;
+  color: #927762;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.recommendation-bottom p {
+  margin: 0;
+  color: #968a81;
+  font-size: 10px;
+  font-style: italic;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 900px) {
+  .onboarding-content {
+    width: 100%;
+    padding: 45px;
+  }
+
+  .genre-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .rating-book-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .onboarding-page {
+    padding: 18px;
+  }
+
+  .onboarding-content {
+    padding: 35px 25px;
+  }
+
+  .onboarding-content .onboarding-brand {
+    margin-bottom: 50px;
+  }
+
+  .onboarding-content h1,
+  .genre-heading h1,
+  .rating-heading h1,
+  .recommendation-heading h1 {
+    font-size: 39px;
+  }
+
+  .genre-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rating-book-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .recommendation-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .genre-bottom,
+  .rating-bottom,
+  .recommendation-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
