@@ -5,6 +5,11 @@ const User = require("../models/User");
 
 const router = express.Router();
 
+
+// =========================================
+// REGISTER
+// =========================================
+
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -19,19 +24,29 @@ router.post("/register", async (req, res) => {
       });
     }
 
-const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-const user = new User({
-  username,
-  email,
-  password: hashedPassword,
-});
+    const user = new User({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
     const savedUser = await user.save();
 
+    // Don't send the password/hash to the frontend
     res.status(201).json({
       message: "User registered successfully",
-      user: savedUser,
+      user: {
+        id: savedUser._id,
+        username: savedUser.username,
+        email: savedUser.email,
+        profilePicture: savedUser.profilePicture,
+        bio: savedUser.bio,
+        favoriteGenres: savedUser.favoriteGenres,
+      },
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Registration failed",
@@ -39,6 +54,11 @@ const user = new User({
     });
   }
 });
+
+
+// =========================================
+// LOGIN
+// =========================================
 
 router.post("/login", async (req, res) => {
   try {
@@ -64,15 +84,15 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-  { userId: user._id },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-res.status(200).json({
-  message: "Login successful",
-  token: token,
-  user: {
+    res.status(200).json({
+      message: "Login successful",
+      token: token,
+      user: {
         id: user._id,
         username: user.username,
         email: user.email,
@@ -81,6 +101,7 @@ res.status(200).json({
         favoriteGenres: user.favoriteGenres,
       },
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Login failed",

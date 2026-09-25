@@ -1,5 +1,6 @@
 import ProfilePanel from './components/ProfilePanel';
-import React, { useMemo, useState } from 'react';
+import { api } from './services/api';
+import React, { useEffect, useMemo, useState } from 'react';
 import { books } from './data/books';
 import Topbar from './components/Topbar';
 import BookCard from './components/BookCard';
@@ -94,6 +95,7 @@ function CurrentlyReading({ reading }) {
 
           <div className="reading-progress-meta">
             <span>{progress}% through</span>
+
             <span>
               {totalPages - page} pages left
             </span>
@@ -121,7 +123,20 @@ function CurrentlyReading({ reading }) {
 }
 
 export default function App() {
+    useEffect(() => {
+    api.getBooks()
+      .then((data) => {
+        console.log('BOOKS FROM MONGODB:', data);
+        setMongoBooks(data);
+      })
+      .catch((error) => {
+        console.error('FAILED TO FETCH BOOKS:', error);
+      });
+  }, []);
+
   const [query, setQuery] = useState('');
+  const [mongoBooks, setMongoBooks] = useState([]);
+  
   const [section, setSection] = useState('home');
   const [modal, setModal] = useState(null);
   const [settings, setSettings] = useState(false);
@@ -191,6 +206,14 @@ export default function App() {
 
   const handleLoginComplete = (user) => {
     setOnboardingStep('genres');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('booknestUser');
+    localStorage.removeItem('booknestToken');
+
+    setSettings(false);
+    setOnboardingStep('login');
   };
 
   const handleGenresComplete = (genres) => {
@@ -454,12 +477,9 @@ export default function App() {
             theme={theme}
             setTheme={setTheme}
             selectedGenres={selectedGenres}
-            setSelectedGenres={
-              setSelectedGenres
-            }
-            onClose={() =>
-              setSettings(false)
-            }
+            setSelectedGenres={setSelectedGenres}
+            onClose={() => setSettings(false)}
+            onLogout={handleLogout}
           />
         </>
       )}

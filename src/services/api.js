@@ -1,3 +1,29 @@
-// Frontend-only API layer. Replace these mock functions with Axios calls when the Express/MongoDB backend is added.
-import {books} from '../data/books';
-export const api = { getBooks: async () => books, getBook: async id => books.find(b=>b.id===Number(id)) };
+const API_URL = 'http://localhost:5000/api';
+
+export const api = {
+
+  getBooks: async () => {
+    const response = await fetch(
+      `${API_URL}/books`
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch books');
+    }
+
+    return response.json();
+  },
+
+  getBook: async (id) => {
+    const response = await fetch(
+      `${API_URL}/books/${id}`
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch book');
+    }
+
+    return response.json();
+  }
+
+};

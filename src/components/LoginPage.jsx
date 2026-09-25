@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './Onboarding.css';
 
+const API_URL = 'http://localhost:5000/api';
+
 export default function LoginPage({ onComplete }) {
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -8,21 +10,58 @@ export default function LoginPage({ onComplete }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password || (isRegistering && !name)) {
       return;
     }
 
-    const user = {
-      name: isRegistering ? name : 'Ayvarhs',
-      email
-    };
+    try {
+      const endpoint = isRegistering
+        ? `${API_URL}/auth/register`
+        : `${API_URL}/auth/login`;
 
-    localStorage.setItem('booknestUser', JSON.stringify(user));
+      const body = isRegistering
+        ? {
+            username: name,
+            email,
+            password,
+          }
+        : {
+            email,
+            password,
+          };
 
-    onComplete(user);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || 'Something went wrong.');
+        return;
+      }
+
+      const user = data.user;
+
+      localStorage.setItem('booknestUser', JSON.stringify(user));
+
+      if (data.token) {
+        localStorage.setItem('booknestToken', data.token);
+      }
+
+      onComplete(user);
+
+    } catch (error) {
+      console.error('Authentication error:', error);
+      alert('Unable to connect to BookNest server.');
+    }
   };
 
   return (

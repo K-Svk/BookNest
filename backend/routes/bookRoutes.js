@@ -3,6 +3,19 @@ const Book = require("../models/Book");
 
 const router = express.Router();
 
+router.get("/", async (req, res) => {
+  try {
+    const books = await Book.find();
+
+    res.status(200).json(books);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch books",
+      error: error.message,
+    });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     const book = new Book(req.body);
