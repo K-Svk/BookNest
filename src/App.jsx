@@ -123,7 +123,14 @@ function CurrentlyReading({ reading }) {
 }
 
 export default function App() {
-    useEffect(() => {
+
+  /*
+    =========================================
+    FETCH BOOKS FROM MONGODB
+    =========================================
+  */
+
+  useEffect(() => {
     api.getBooks()
       .then((data) => {
         console.log('BOOKS FROM MONGODB:', data);
@@ -136,7 +143,31 @@ export default function App() {
 
   const [query, setQuery] = useState('');
   const [mongoBooks, setMongoBooks] = useState([]);
-  
+
+  /*
+    =========================================
+    CONVERT MONGODB BOOK FORMAT
+    TO BOOKNEST FRONTEND FORMAT
+    =========================================
+  */
+
+  const formattedMongoBooks = mongoBooks.map((book) => ({
+    id: book._id,
+    title: book.title,
+    author: book.author,
+    cover: book.coverImage,
+    description: book.description,
+    genre: book.genres?.[0] || '',
+    publishedYear: book.publishedYear,
+    rating: book.averageRating,
+    status: 'read',
+  }));
+
+  console.log(
+    'FORMATTED MONGODB BOOKS:',
+    formattedMongoBooks
+  );
+
   const [section, setSection] = useState('home');
   const [modal, setModal] = useState(null);
   const [settings, setSettings] = useState(false);
@@ -279,9 +310,19 @@ export default function App() {
     (b) => b.status === 'tbr'
   );
 
-  const read = filtered.filter(
-    (b) => b.status === 'read'
-  );
+  /*
+    Existing frontend "read" books
+    + MongoDB "read" books
+  */
+
+  const read = [
+    ...filtered.filter(
+      (b) => b.status === 'read'
+    ),
+    ...formattedMongoBooks.filter(
+      (b) => b.status === 'read'
+    )
+  ];
 
   const totalBooks = books.filter(
     (book) => book.status !== 'currently'
@@ -335,7 +376,6 @@ export default function App() {
   /*
     =========================================
     EXISTING BOOKNEST APP
-    NOTHING BELOW THIS POINT HAS BEEN CHANGED
     =========================================
   */
 
