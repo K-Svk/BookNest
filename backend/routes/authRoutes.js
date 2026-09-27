@@ -201,4 +201,70 @@ router.get("/me", authenticateToken, async (req, res) => {
   }
 });
 
+router.put("/profile", authenticateToken, async (req, res) => {
+  try {
+    const { username, bio } = req.body;
+
+    const trimmedUsername =
+      typeof username === "string"
+        ? username.trim()
+        : "";
+
+    const trimmedBio =
+      typeof bio === "string"
+        ? bio.trim()
+        : "";
+
+    if (!trimmedUsername) {
+      return res.status(400).json({
+        message: "Name cannot be empty",
+      });
+    }
+
+    const existingUser = await User.findOne({
+      username: trimmedUsername,
+      _id: { $ne: req.userId },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "That name is already taken",
+      });
+    }
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    user.username = trimmedUsername;
+    user.bio = trimmedBio;
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        profilePicture: updatedUser.profilePicture,
+        bio: updatedUser.bio,
+        favoriteGenres: updatedUser.favoriteGenres,
+        createdAt: updatedUser.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("UPDATE PROFILE ERROR:", error);
+
+    res.status(500).json({
+      message: "Failed to update profile",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

@@ -8,6 +8,8 @@ import {
   MessageCircle,
   Bookmark,
   Star,
+  X,
+  Check,
 } from "lucide-react";
 
 import "./ProfilePanel.css";
@@ -15,7 +17,7 @@ import "./ProfilePanel.css";
 const API_URL = "http://localhost:5000/api";
 
 const DEFAULT_PROFILE_PICTURE =
-  "https://i.pinimg.com/736x/91/4c/5b/914c5b3ef2b9fbd0e9dc1c12b7b9c1a2.jpg";
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23eee5d8'/%3E%3Cellipse cx='100' cy='108' rx='65' ry='58' fill='%23c49b7a'/%3E%3Cpath d='M45 75 L42 30 L78 55 Q100 47 122 55 L158 30 L155 75' fill='%23c49b7a'/%3E%3Cellipse cx='76' cy='102' rx='7' ry='9' fill='%23302b27'/%3E%3Cellipse cx='124' cy='102' rx='7' ry='9' fill='%23302b27'/%3E%3Cpath d='M94 119 Q100 124 106 119' fill='none' stroke='%23302b27' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M62 120 L25 114 M62 128 L24 133 M138 120 L175 114 M138 128 L176 133' stroke='%23302b27' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E";
 
 function Rating({ rating }) {
   return (
@@ -36,12 +38,17 @@ export default function ProfilePanel() {
   const [library, setLibrary] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editUsername, setEditUsername] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
+
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("booknestToken");
 
       if (!token) {
-        console.log("PROFILE: No BookNest token found.");
         setLoading(false);
         return;
       }
@@ -49,60 +56,31 @@ export default function ProfilePanel() {
       try {
         setLoading(true);
 
-        const profileResponse = await fetch(
-          `${API_URL}/auth/me`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const profileResponse = await fetch(`${API_URL}/auth/me`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!profileResponse.ok) {
-          const errorData = await profileResponse.json().catch(() => ({}));
-
-          console.error(
-            "PROFILE REQUEST FAILED:",
-            profileResponse.status,
-            errorData
-          );
-
-          throw new Error(
-            errorData.message || "Failed to fetch profile"
-          );
+          throw new Error("Failed to fetch profile");
         }
 
         const profileData = await profileResponse.json();
 
-        const libraryResponse = await fetch(
-          `${API_URL}/library`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const libraryResponse = await fetch(`${API_URL}/library`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!libraryResponse.ok) {
-          const errorData = await libraryResponse.json().catch(() => ({}));
-
-          console.error(
-            "LIBRARY REQUEST FAILED:",
-            libraryResponse.status,
-            errorData
-          );
-
-          throw new Error(
-            errorData.message || "Failed to fetch library"
-          );
+          throw new Error("Failed to fetch library");
         }
 
         const libraryData = await libraryResponse.json();
-
-        console.log("BOOKNEST PROFILE:", profileData);
-        console.log("BOOKNEST LIBRARY:", libraryData);
 
         setUser(profileData);
         setLibrary(Array.isArray(libraryData) ? libraryData : []);
@@ -119,49 +97,27 @@ export default function ProfilePanel() {
   }, []);
 
   const readBooks = useMemo(
-    () =>
-      library.filter(
-        (entry) => entry.status === "read"
-      ),
+    () => library.filter((entry) => entry.status === "read"),
     [library]
   );
 
   const tbrBooks = useMemo(
-    () =>
-      library.filter(
-        (entry) => entry.status === "tbr"
-      ),
+    () => library.filter((entry) => entry.status === "tbr"),
     [library]
   );
 
   const currentlyReading = useMemo(
-    () =>
-      library.find(
-        (entry) => entry.status === "currently"
-      ),
+    () => library.find((entry) => entry.status === "currently"),
     [library]
   );
 
   const ratedBooks = useMemo(
     () =>
       readBooks
-        .filter(
-          (entry) =>
-            Number(entry.rating) > 0
-        )
+        .filter((entry) => Number(entry.rating) > 0)
         .sort((a, b) => {
-          const dateA = new Date(
-            a.updatedAt ||
-              a.createdAt ||
-              0
-          );
-
-          const dateB = new Date(
-            b.updatedAt ||
-              b.createdAt ||
-              0
-          );
-
+          const dateA = new Date(a.updatedAt || a.createdAt || 0);
+          const dateB = new Date(b.updatedAt || b.createdAt || 0);
           return dateB - dateA;
         }),
     [readBooks]
@@ -177,18 +133,105 @@ export default function ProfilePanel() {
       : ["No genres selected yet"];
 
   const profilePicture =
-    user?.profilePicture ||
-    DEFAULT_PROFILE_PICTURE;
+    user?.profilePicture || DEFAULT_PROFILE_PICTURE;
+
+  const openEditProfile = () => {
+    setEditUsername(user?.username || "");
+    setEditBio(user?.bio || "");
+    setProfileMessage("");
+    setEditingProfile(true);
+  };
+
+  const closeEditProfile = () => {
+    if (savingProfile) {
+      return;
+    }
+
+    setEditingProfile(false);
+    setProfileMessage("");
+  };
+
+  const saveProfile = async () => {
+    const token = localStorage.getItem("booknestToken");
+
+    if (!token) {
+      setProfileMessage("Please log in again.");
+      return;
+    }
+
+    if (!editUsername.trim()) {
+      setProfileMessage("Name cannot be empty.");
+      return;
+    }
+
+    setSavingProfile(true);
+    setProfileMessage("");
+
+    try {
+      const response = await fetch(`${API_URL}/auth/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username: editUsername.trim(),
+          bio: editBio.trim(),
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to update profile"
+        );
+      }
+
+      setUser(data.user);
+
+      const storedUser = localStorage.getItem("booknestUser");
+
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+
+          localStorage.setItem(
+            "booknestUser",
+            JSON.stringify({
+              ...parsedUser,
+              username: data.user.username,
+              bio: data.user.bio,
+              profilePicture: data.user.profilePicture,
+              favoriteGenres: data.user.favoriteGenres,
+            })
+          );
+        } catch {
+          localStorage.setItem(
+            "booknestUser",
+            JSON.stringify(data.user)
+          );
+        }
+      }
+
+      setEditingProfile(false);
+      setProfileMessage("Profile updated successfully.");
+    } catch (error) {
+      console.error("PROFILE UPDATE FAILED:", error);
+      setProfileMessage(
+        error.message || "Could not update profile."
+      );
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   if (loading) {
     return (
       <section className="profile-page">
         <div className="profile-hero">
           <div className="profile-intro">
-            <p className="profile-eyebrow">
-              BOOKNEST MEMBER
-            </p>
-
+            <p className="profile-eyebrow">BOOKNEST MEMBER</p>
             <h1>Loading profile...</h1>
           </div>
         </div>
@@ -201,15 +244,10 @@ export default function ProfilePanel() {
       <section className="profile-page">
         <div className="profile-hero">
           <div className="profile-intro">
-            <p className="profile-eyebrow">
-              BOOKNEST MEMBER
-            </p>
-
+            <p className="profile-eyebrow">BOOKNEST MEMBER</p>
             <h1>Profile unavailable</h1>
-
             <p className="profile-bio">
-              Please log in to view your BookNest
-              profile.
+              Please log in to view your BookNest profile.
             </p>
           </div>
         </div>
@@ -224,14 +262,18 @@ export default function ProfilePanel() {
           <img
             className="profile-avatar"
             src={profilePicture}
-            alt={`${user.username}'s profile`}
+            alt="Profile"
+            onError={(event) => {
+              event.currentTarget.src = DEFAULT_PROFILE_PICTURE;
+            }}
           />
 
           <button
             className="profile-edit-avatar"
             type="button"
-            aria-label="Edit profile picture"
-            title="Edit profile picture"
+            aria-label="Edit profile"
+            title="Edit profile"
+            onClick={openEditProfile}
           >
             <Pencil size={15} />
           </button>
@@ -240,16 +282,14 @@ export default function ProfilePanel() {
         <div className="profile-intro">
           <div className="profile-name-row">
             <div>
-              <p className="profile-eyebrow">
-                BOOKNEST MEMBER
-              </p>
-
+              <p className="profile-eyebrow">BOOKNEST MEMBER</p>
               <h1>{user.username}</h1>
             </div>
 
             <button
               className="profile-edit-button"
               type="button"
+              onClick={openEditProfile}
             >
               <Pencil size={15} />
               Edit profile
@@ -275,10 +315,13 @@ export default function ProfilePanel() {
         </div>
       </div>
 
+      {profileMessage && (
+        <div className="profile-message">{profileMessage}</div>
+      )}
+
       <div className="profile-stats">
         <div className="profile-stat">
           <BookOpen size={19} />
-
           <div>
             <strong>{readBooks.length}</strong>
             <span>Books read</span>
@@ -287,7 +330,6 @@ export default function ProfilePanel() {
 
         <div className="profile-stat">
           <Bookmark size={19} />
-
           <div>
             <strong>{tbrBooks.length}</strong>
             <span>On TBR</span>
@@ -296,7 +338,6 @@ export default function ProfilePanel() {
 
         <div className="profile-stat">
           <Heart size={19} />
-
           <div>
             <strong>0</strong>
             <span>Favourites</span>
@@ -305,7 +346,6 @@ export default function ProfilePanel() {
 
         <div className="profile-stat">
           <MessageCircle size={19} />
-
           <div>
             <strong>{ratedBooks.length}</strong>
             <span>Rated books</span>
@@ -321,7 +361,6 @@ export default function ProfilePanel() {
                 <p className="profile-section-kicker">
                   MY READING TASTE
                 </p>
-
                 <h2>Favorite genres</h2>
               </div>
 
@@ -332,10 +371,7 @@ export default function ProfilePanel() {
 
             <div className="genre-list">
               {favoriteGenres.map((genre) => (
-                <span
-                  className="genre-pill"
-                  key={genre}
-                >
+                <span className="genre-pill" key={genre}>
                   {genre}
                 </span>
               ))}
@@ -348,7 +384,6 @@ export default function ProfilePanel() {
                 <p className="profile-section-kicker">
                   FROM THE READING JOURNAL
                 </p>
-
                 <h2>Recent reviews</h2>
               </div>
 
@@ -362,61 +397,45 @@ export default function ProfilePanel() {
 
             <div className="review-list">
               {ratedBooks.length > 0 ? (
-                ratedBooks
-                  .slice(0, 3)
-                  .map((entry) => (
-                    <article
-                      className="review-card"
-                      key={entry._id}
-                    >
-                      <div className="review-card-top">
-                        <div>
-                          <h3>
-                            {entry.book?.title ||
-                              "Untitled book"}
-                          </h3>
-
-                          <p>
-                            {entry.book?.author ||
-                              "Unknown author"}
-                          </p>
-                        </div>
-
-                        <Rating
-                          rating={entry.rating}
-                        />
+                ratedBooks.slice(0, 3).map((entry) => (
+                  <article
+                    className="review-card"
+                    key={entry._id}
+                  >
+                    <div className="review-card-top">
+                      <div>
+                        <h3>
+                          {entry.book?.title || "Untitled book"}
+                        </h3>
+                        <p>
+                          {entry.book?.author || "Unknown author"}
+                        </p>
                       </div>
 
-                      <p className="review-text">
-                        You rated this book{" "}
-                        {entry.rating} out of 5.
-                      </p>
+                      <Rating rating={entry.rating} />
+                    </div>
 
-                      <div className="review-footer">
-                        <span>
-                          Rated on BookNest
-                        </span>
+                    <p className="review-text">
+                      You rated this book {entry.rating} out of 5.
+                    </p>
 
-                        <MessageCircle size={14} />
-                      </div>
-                    </article>
-                  ))
+                    <div className="review-footer">
+                      <span>Rated on BookNest</span>
+                      <MessageCircle size={14} />
+                    </div>
+                  </article>
+                ))
               ) : (
                 <article className="review-card">
                   <div className="review-card-top">
                     <div>
                       <h3>No ratings yet</h3>
-
-                      <p>
-                        Your reading journal is
-                        waiting.
-                      </p>
+                      <p>Your reading journal is waiting.</p>
                     </div>
                   </div>
 
                   <p className="review-text">
-                    Rate books you've read and
-                    they'll appear here.
+                    Rate books you've read and they'll appear here.
                   </p>
                 </article>
               )}
@@ -426,75 +445,39 @@ export default function ProfilePanel() {
 
         <aside className="profile-side-column">
           <section className="profile-mini-card">
-            <p className="profile-section-kicker">
-              RIGHT NOW
-            </p>
-
+            <p className="profile-section-kicker">RIGHT NOW</p>
             <h2>Currently reading</h2>
 
             {currentlyReading?.book ? (
               <div className="currently-reading-profile">
                 <div className="mini-book-cover">
-                  {currentlyReading.book
-                    .coverImage ? (
+                  {currentlyReading.book.coverImage ? (
                     <img
-                      src={
-                        currentlyReading.book
-                          .coverImage
-                      }
-                      alt={
-                        currentlyReading.book
-                          .title
-                      }
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
+                      src={currentlyReading.book.coverImage}
+                      alt={currentlyReading.book.title}
                     />
                   ) : (
                     <>
                       <div className="mini-book-spine"></div>
-
                       <div className="mini-book-title">
-                        {
-                          currentlyReading.book
-                            .title
-                        }
+                        {currentlyReading.book.title}
                       </div>
                     </>
                   )}
                 </div>
 
                 <div>
-                  <h3>
-                    {
-                      currentlyReading.book
-                        .title
-                    }
-                  </h3>
-
-                  <p>
-                    {
-                      currentlyReading.book
-                        .author
-                    }
-                  </p>
+                  <h3>{currentlyReading.book.title}</h3>
+                  <p>{currentlyReading.book.author}</p>
 
                   <span className="reading-progress-profile">
-                    {currentlyReading.book
-                      .pages
+                    {currentlyReading.book.pages
                       ? `${Math.round(
                           (currentlyReading.currentPage /
-                            currentlyReading
-                              .book
-                              .pages) *
+                            currentlyReading.book.pages) *
                             100
                         )}% read`
-                      : `${
-                          currentlyReading.currentPage ||
-                          0
-                        } pages read`}
+                      : `${currentlyReading.currentPage || 0} pages read`}
                   </span>
                 </div>
               </div>
@@ -511,73 +494,147 @@ export default function ProfilePanel() {
                 <p className="profile-section-kicker">
                   ON MY RADAR
                 </p>
-
                 <h2>Hyped books</h2>
               </div>
             </div>
 
             <div className="hyped-books">
               {tbrBooks.length > 0 ? (
-                tbrBooks
-                  .slice(0, 3)
-                  .map((entry) => (
-                    <div
-                      className="hyped-book"
-                      key={entry._id}
-                    >
-                      {entry.book?.coverImage ? (
-                        <img
-                          src={
-                            entry.book.coverImage
-                          }
-                          alt={
-                            entry.book.title
-                          }
-                        />
-                      ) : (
-                        <div className="mini-book-cover">
-                          <div className="mini-book-spine"></div>
-
-                          <div className="mini-book-title">
-                            {entry.book?.title}
-                          </div>
-                        </div>
-                      )}
-
-                      <div>
-                        <h3>
+                tbrBooks.slice(0, 3).map((entry) => (
+                  <div className="hyped-book" key={entry._id}>
+                    {entry.book?.coverImage ? (
+                      <img
+                        src={entry.book.coverImage}
+                        alt={entry.book.title}
+                      />
+                    ) : (
+                      <div className="mini-book-cover">
+                        <div className="mini-book-spine"></div>
+                        <div className="mini-book-title">
                           {entry.book?.title}
-                        </h3>
-
-                        <p>
-                          {entry.book?.author ||
-                            "Unknown author"}
-                        </p>
+                        </div>
                       </div>
+                    )}
+
+                    <div>
+                      <h3>{entry.book?.title}</h3>
+                      <p>
+                        {entry.book?.author || "Unknown author"}
+                      </p>
                     </div>
-                  ))
+                  </div>
+                ))
               ) : (
-                <p className="profile-bio">
-                  Your TBR is empty.
-                </p>
+                <p className="profile-bio">Your TBR is empty.</p>
               )}
             </div>
           </section>
 
           <section className="profile-note-card">
-            <div className="note-decoration">
-              “
-            </div>
+            <div className="note-decoration">“</div>
 
             <p>
-              A room without books is like a
-              body without a soul.
+              A room without books is like a body without a soul.
             </p>
 
             <span>— Cicero</span>
           </section>
         </aside>
       </div>
+
+      {editingProfile && (
+        <div
+          className="profile-edit-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeEditProfile();
+            }
+          }}
+        >
+          <div className="profile-edit-modal">
+            <div className="profile-edit-header">
+              <div>
+                <p className="profile-section-kicker">
+                  YOUR PROFILE
+                </p>
+                <h2>Edit profile</h2>
+              </div>
+
+              <button
+                className="profile-edit-close"
+                type="button"
+                onClick={closeEditProfile}
+                disabled={savingProfile}
+                aria-label="Close edit profile"
+              >
+                <X size={19} />
+              </button>
+            </div>
+
+            <div className="profile-edit-avatar-preview">
+              <img
+                src={profilePicture}
+                alt="Profile preview"
+              />
+            </div>
+
+            <label className="profile-edit-field">
+              <span>Name</span>
+
+              <input
+                type="text"
+                value={editUsername}
+                onChange={(event) =>
+                  setEditUsername(event.target.value)
+                }
+                maxLength={40}
+                placeholder="Your name"
+              />
+            </label>
+
+            <label className="profile-edit-field">
+              <span>Bio</span>
+
+              <textarea
+                value={editBio}
+                onChange={(event) =>
+                  setEditBio(event.target.value)
+                }
+                maxLength={180}
+                rows={5}
+                placeholder="Tell us a little about yourself..."
+              />
+            </label>
+
+            {profileMessage && (
+              <p className="profile-edit-message">
+                {profileMessage}
+              </p>
+            )}
+
+            <div className="profile-edit-actions">
+              <button
+                className="profile-edit-cancel"
+                type="button"
+                onClick={closeEditProfile}
+                disabled={savingProfile}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="profile-edit-save"
+                type="button"
+                onClick={saveProfile}
+                disabled={savingProfile}
+              >
+                <Check size={16} />
+                {savingProfile ? "Saving..." : "Save changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
