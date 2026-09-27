@@ -1,11 +1,12 @@
+```javascript
 export const books = [
-  // =========================
+
+  // =========================================
   // CURRENTLY READING
-  // These NEVER appear in TBR / Read
-  // =========================
+  // =========================================
 
   {
-    id: 10,
+    id: 1,
     title: 'The Hobbit',
     author: 'J.R.R. Tolkien',
     genre: 'Fantasy',
@@ -17,8 +18,38 @@ export const books = [
       'Bilbo Baggins leaves his comfortable life in the Shire and joins a company of dwarves on an unexpected adventure involving dragons, treasure, and a journey far beyond home.'
   },
 
+  // =========================================
+  // CLASSIC FICTION
+  // =========================================
+
   {
-    id: 11,
+    id: 2,
+    title: 'To Kill a Mockingbird',
+    author: 'Harper Lee',
+    genre: 'Classic Fiction',
+    status: 'tbr',
+    pages: 336,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780061120084-L.jpg',
+    quote: 'You never really understand a person until you consider things from his point of view.',
+    blurb:
+      'Through Scout Finch’s childhood in the American South, Harper Lee explores justice, prejudice, compassion, and the loss of innocence.'
+  },
+
+  {
+    id: 3,
+    title: 'The Great Gatsby',
+    author: 'F. Scott Fitzgerald',
+    genre: 'Classic Fiction',
+    status: 'read',
+    pages: 180,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg',
+    quote: 'So we beat on, boats against the current, borne back ceaselessly into the past.',
+    blurb:
+      'Jay Gatsby throws extravagant parties in pursuit of a lost love, revealing the glamour, longing, and emptiness beneath the American Dream.'
+  },
+
+  {
+    id: 4,
     title: 'Pride and Prejudice',
     author: 'Jane Austen',
     genre: 'Classic Fiction',
@@ -32,11 +63,11 @@ export const books = [
   },
 
   {
-    id: 12,
+    id: 5,
     title: 'Jane Eyre',
     author: 'Charlotte Brontë',
     genre: 'Classic Fiction',
-    status: 'currently',
+    status: 'tbr',
     pages: 532,
     cover: 'https://covers.openlibrary.org/b/isbn/9780141441146-L.jpg',
     quote:
@@ -45,357 +76,613 @@ export const books = [
       'An orphaned young woman grows into an independent thinker and finds love, identity, and difficult choices while working at Thornfield Hall.'
   },
 
-  // =========================
-  // ORIGINAL TBR
-  // =========================
-
   {
-    id: 1,
-    title: 'The Secret History',
-    author: 'Donna Tartt',
-    genre: 'Literary Fiction',
+    id: 6,
+    title: 'Wuthering Heights',
+    author: 'Emily Brontë',
+    genre: 'Classic Fiction',
     status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/1400031702-L.jpg',
+    pages: 416,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780141439556-L.jpg',
+    quote:
+      'Whatever our souls are made of, his and mine are the same.',
     blurb:
-      'A group of classics students at an elite college discover that the line between intellectual obsession and moral consequence can disappear quickly.'
-  },
-
-  {
-    id: 2,
-    title: 'Tomorrow, and Tomorrow, and Tomorrow',
-    author: 'Gabrielle Zevin',
-    genre: 'Contemporary',
-    status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/0593321200-L.jpg',
-    blurb:
-      'Two friends, collaborators, and game designers build worlds together while navigating ambition, love, loss, and the complicated ways people stay connected.'
-  },
-
-  {
-    id: 3,
-    title: 'Piranesi',
-    author: 'Susanna Clarke',
-    genre: 'Fantasy',
-    status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/1635577808-L.jpg',
-    blurb:
-      'In a mysterious house filled with statues and endless halls, Piranesi records the wonders around him while slowly questioning what he has been told about his world.'
+      'A dark and passionate story of love, obsession, revenge, and generations of conflict across the Yorkshire moors.'
   },
 
   {
     id: 7,
-    title: 'The Book Thief',
-    author: 'Markus Zusak',
-    genre: 'Historical Fiction',
-    status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/0375842209-L.jpg',
+    title: 'Little Women',
+    author: 'Louisa May Alcott',
+    genre: 'Classic Fiction',
+    status: 'read',
+    pages: 449,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780147514011-L.jpg',
+    quote:
+      'I am not afraid of storms, for I am learning how to sail my ship.',
     blurb:
-      'Narrated by Death, this story follows Liesel, a young girl in Nazi Germany whose love for books becomes a quiet form of resistance and connection.'
+      'The four March sisters grow up together during the American Civil War, each finding her own path through family, ambition, love, and adulthood.'
   },
 
   {
     id: 8,
-    title: 'Before the Coffee Gets Cold',
-    author: 'Toshikazu Kawaguchi',
-    genre: 'Magical Realism',
+    title: 'The Catcher in the Rye',
+    author: 'J.D. Salinger',
+    genre: 'Classic Fiction',
     status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/1529029589-L.jpg',
+    pages: 277,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780316769488-L.jpg',
+    quote:
+      'What really knocks me out is a book that, when you’re all done reading it, you wish the author that wrote it was a terrific friend of yours.',
     blurb:
-      'At a small Japanese café, visitors can travel briefly into the past—but only under a few very particular rules.'
+      'Holden Caulfield wanders through New York after leaving school, struggling with adulthood, alienation, grief, and the world around him.'
   },
 
   {
     id: 9,
-    title: 'Circe',
-    author: 'Madeline Miller',
-    genre: 'Mythology',
-    status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/0316556343-L.jpg',
+    title: 'The Picture of Dorian Gray',
+    author: 'Oscar Wilde',
+    genre: 'Classic Fiction',
+    status: 'read',
+    pages: 254,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780141439570-L.jpg',
+    quote:
+      'The only way to get rid of a temptation is to yield to it.',
     blurb:
-      'The witch Circe finds her own voice and power among gods, monsters, mortals, and the myths that have defined her.'
+      'A beautiful young man remains outwardly unchanged while a mysterious portrait bears the consequences of his increasingly immoral life.'
   },
 
-  // =========================
-  // HARRY POTTER
-  // =========================
+  {
+    id: 10,
+    title: '1984',
+    author: 'George Orwell',
+    genre: 'Classic Fiction',
+    status: 'tbr',
+    pages: 328,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg',
+    quote:
+      'Big Brother is watching you.',
+    blurb:
+      'In a totalitarian future where truth itself can be rewritten, Winston Smith begins to question the world he has been forced to accept.'
+  },
+
+  {
+    id: 11,
+    title: 'Animal Farm',
+    author: 'George Orwell',
+    genre: 'Classic Fiction',
+    status: 'read',
+    pages: 112,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780451526342-L.jpg',
+    quote:
+      'All animals are equal, but some animals are more equal than others.',
+    blurb:
+      'A group of farm animals overthrow their human owner and attempt to build a society of equality, only to see power reshape their revolution.'
+  },
+
+  {
+    id: 12,
+    title: 'The Old Man and the Sea',
+    author: 'Ernest Hemingway',
+    genre: 'Classic Fiction',
+    status: 'tbr',
+    pages: 128,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780684830490-L.jpg',
+    quote:
+      'But man is not made for defeat.',
+    blurb:
+      'An aging fisherman ventures far into the sea and faces an enormous struggle that tests endurance, pride, and hope.'
+  },
+
+  {
+    id: 13,
+    title: 'The Count of Monte Cristo',
+    author: 'Alexandre Dumas',
+    genre: 'Classic Fiction',
+    status: 'tbr',
+    pages: 1276,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780140449266-L.jpg',
+    quote:
+      'Wait and hope.',
+    blurb:
+      'Wrongfully imprisoned for years, Edmond Dantès escapes with a fortune and returns under a new identity to seek justice against those who betrayed him.'
+  },
+
+  {
+    id: 14,
+    title: 'The Alchemist',
+    author: 'Paulo Coelho',
+    genre: 'Classic Fiction',
+    status: 'read',
+    pages: 208,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780062315007-L.jpg',
+    quote:
+      'When you want something, all the universe conspires in helping you to achieve it.',
+    blurb:
+      'A young shepherd follows a recurring dream across the desert in search of treasure and discovers lessons about purpose, courage, and destiny.'
+  },
+
+  // =========================================
+  // MYSTERY & DETECTIVE FICTION
+  // =========================================
 
   {
     id: 20,
-    title: "Harry Potter and the Philosopher's Stone",
-    author: 'J.K. Rowling',
-    genre: 'Fantasy',
-    status: 'read',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780747532743-L.jpg',
+    title: 'And Then There Were None',
+    author: 'Agatha Christie',
+    genre: 'Mystery',
+    status: 'tbr',
+    pages: 272,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780062073488-L.jpg',
+    quote:
+      'Ten strangers are invited to an isolated island. None of them knows why.',
     blurb:
-      'Harry Potter discovers that he is a wizard and begins his first year at Hogwarts, where friendship, magic, and an old enemy await him.'
+      'Ten people arrive on a remote island and discover that someone among them is determined to expose their secrets one by one.'
   },
 
   {
     id: 21,
-    title: 'Harry Potter and the Chamber of Secrets',
-    author: 'J.K. Rowling',
-    genre: 'Fantasy',
-    status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780439064866-L.jpg',
+    title: 'The Murder of Roger Ackroyd',
+    author: 'Agatha Christie',
+    genre: 'Mystery',
+    status: 'read',
+    pages: 288,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780062074002-L.jpg',
+    quote:
+      'The truth, however ugly in itself, is always curious and beautiful to seekers after it.',
     blurb:
-      'Harry returns to Hogwarts for another year, only to find the school threatened by a mysterious chamber and a dangerous force from its past.'
+      'Hercule Poirot investigates the mysterious murder of Roger Ackroyd in one of the most celebrated detective mysteries ever written.'
   },
 
   {
     id: 22,
-    title: 'Harry Potter and the Prisoner of Azkaban',
-    author: 'J.K. Rowling',
-    genre: 'Fantasy',
+    title: 'The Hound of the Baskervilles',
+    author: 'Arthur Conan Doyle',
+    genre: 'Mystery',
     status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780439136365-L.jpg',
+    pages: 256,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780140437866-L.jpg',
+    quote:
+      'There is nothing more deceptive than an obvious fact.',
     blurb:
-      'A dangerous prisoner escapes from Azkaban while Harry learns more about his parents and the complicated history surrounding their deaths.'
+      'Sherlock Holmes investigates a terrifying legend surrounding the Baskerville family and a mysterious death on the Devon moors.'
   },
 
-  // =========================
-  // PERCY JACKSON
-  // =========================
+  {
+    id: 23,
+    title: 'The Adventures of Sherlock Holmes',
+    author: 'Arthur Conan Doyle',
+    genre: 'Mystery',
+    status: 'read',
+    pages: 307,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780140437712-L.jpg',
+    quote:
+      'When you have eliminated the impossible, whatever remains, however improbable, must be the truth.',
+    blurb:
+      'Sherlock Holmes and Dr. Watson solve a collection of baffling cases involving deception, crime, hidden motives, and ingenious clues.'
+  },
+
+  {
+    id: 24,
+    title: 'The Girl with the Dragon Tattoo',
+    author: 'Stieg Larsson',
+    genre: 'Mystery',
+    status: 'tbr',
+    pages: 465,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780307454546-L.jpg',
+    quote:
+      'Friendship—my definition—is built on two things: respect and trust.',
+    blurb:
+      'A journalist and a brilliant hacker investigate a decades-old disappearance inside a wealthy Swedish family.'
+  },
+
+  {
+    id: 25,
+    title: 'Gone Girl',
+    author: 'Gillian Flynn',
+    genre: 'Mystery',
+    status: 'read',
+    pages: 432,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780553418361-L.jpg',
+    quote:
+      'Love makes you want to be a better person.',
+    blurb:
+      'When Amy Dunne disappears on her fifth wedding anniversary, suspicion falls on her husband and the carefully constructed story of their marriage begins to unravel.'
+  },
+
+  {
+    id: 26,
+    title: 'The Name of the Rose',
+    author: 'Umberto Eco',
+    genre: 'Mystery',
+    status: 'tbr',
+    pages: 592,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780544176560-L.jpg',
+    quote:
+      'Books are not made to be believed, but to be subjected to inquiry.',
+    blurb:
+      'A series of mysterious deaths inside a medieval monastery draws a young monk and his mentor into a labyrinth of secrets and forbidden knowledge.'
+  },
+
+  // =========================================
+  // DAN BROWN
+  // =========================================
 
   {
     id: 30,
-    title: 'Percy Jackson and the Lightning Thief',
-    author: 'Rick Riordan',
-    genre: 'Fantasy',
-    status: 'read',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780786856299-L.jpg',
-    blurb:
-      'Percy Jackson discovers that the myths of ancient Greece are real and that he may be at the centre of a conflict between the gods.'
-  },
-
-  {
-    id: 31,
-    title: 'The Sea of Monsters',
-    author: 'Rick Riordan',
-    genre: 'Fantasy',
-    status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780786856862-L.jpg',
-    blurb:
-      'Percy returns to Camp Half-Blood and embarks on a dangerous journey across the Sea of Monsters to save his friends and his home.'
-  },
-
-  {
-    id: 32,
-    title: 'The Titan’s Curse',
-    author: 'Rick Riordan',
-    genre: 'Fantasy',
-    status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/9781423101482-L.jpg',
-    blurb:
-      'Percy and his friends face a new prophecy and a growing threat from the Titans while searching for a missing goddess.'
-  },
-
-  // =========================
-  // ROBERT LANGDON / DAN BROWN
-  // =========================
-
-  {
-    id: 40,
     title: 'Angels & Demons',
     author: 'Dan Brown',
     genre: 'Mystery',
     status: 'read',
+    pages: 736,
     cover: 'https://covers.openlibrary.org/b/isbn/9780743493468-L.jpg',
     blurb:
       'Robert Langdon is drawn into a race through Rome after an ancient secret society resurfaces with a dangerous plan.'
   },
 
   {
-    id: 41,
+    id: 31,
     title: 'The Da Vinci Code',
     author: 'Dan Brown',
     genre: 'Mystery',
     status: 'tbr',
+    pages: 689,
     cover: 'https://covers.openlibrary.org/b/isbn/9780307474278-L.jpg',
     blurb:
       'Robert Langdon investigates a murder in Paris that leads to a series of clues hidden inside art, history, and ancient symbols.'
   },
 
   {
-    id: 42,
+    id: 32,
     title: 'The Lost Symbol',
     author: 'Dan Brown',
     genre: 'Mystery',
     status: 'tbr',
+    pages: 624,
     cover: 'https://covers.openlibrary.org/b/isbn/9780385504225-L.jpg',
     blurb:
       'Langdon is pulled into a mystery involving Washington, secret societies, ancient symbols, and a race against time.'
   },
 
   {
-    id: 43,
+    id: 33,
     title: 'Inferno',
     author: 'Dan Brown',
     genre: 'Mystery',
     status: 'read',
+    pages: 480,
     cover: 'https://covers.openlibrary.org/b/isbn/9780552161260-L.jpg',
     blurb:
       'Robert Langdon awakens in Florence with no memory of the previous day and becomes involved in a mystery connected to Dante.'
   },
 
   {
-    id: 44,
+    id: 34,
     title: 'Origin',
     author: 'Dan Brown',
     genre: 'Mystery',
     status: 'tbr',
+    pages: 461,
     cover: 'https://covers.openlibrary.org/b/isbn/9780552174161-L.jpg',
     blurb:
       'Langdon travels to Spain after a startling discovery promises to challenge fundamental ideas about humanity and its future.'
   },
 
-  // =========================
-  // ANTHONY HOROWITZ
-  // =========================
+  // =========================================
+  // CRIME & MAFIA
+  // =========================================
+
+  {
+    id: 40,
+    title: 'The Godfather',
+    author: 'Mario Puzo',
+    genre: 'Crime',
+    status: 'read',
+    pages: 448,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780451205766-L.jpg',
+    quote:
+      'A man who doesn’t spend time with his family can never be a real man.',
+    blurb:
+      'The Corleone family navigates loyalty, power, revenge, and organized crime in Mario Puzo’s iconic story of an American mafia dynasty.'
+  },
+
+  {
+    id: 41,
+    title: 'The Talented Mr. Ripley',
+    author: 'Patricia Highsmith',
+    genre: 'Crime',
+    status: 'tbr',
+    pages: 272,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780393327277-L.jpg',
+    quote:
+      'It was a question of whether he could get away with it.',
+    blurb:
+      'Tom Ripley becomes fascinated by a wealthy young man and discovers just how far he is willing to go to enter another person’s life.'
+  },
+
+  {
+    id: 42,
+    title: 'The Silence of the Lambs',
+    author: 'Thomas Harris',
+    genre: 'Crime',
+    status: 'tbr',
+    pages: 352,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780312924584-L.jpg',
+    blurb:
+      'An FBI trainee seeks the help of the imprisoned Hannibal Lecter while tracking a dangerous serial killer.'
+  },
+
+  {
+    id: 43,
+    title: 'The Shining',
+    author: 'Stephen King',
+    genre: 'Horror',
+    status: 'read',
+    pages: 688,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780307743657-L.jpg',
+    blurb:
+      'A family moves into an isolated mountain hotel for the winter, where supernatural forces begin to prey upon them.'
+  },
+
+  // =========================================
+  // HISTORICAL & LITERARY FICTION
+  // =========================================
 
   {
     id: 50,
-    title: 'The Word Is Murder',
-    author: 'Anthony Horowitz',
-    genre: 'Mystery',
-    status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780062676834-L.jpg',
+    title: 'The Kite Runner',
+    author: 'Khaled Hosseini',
+    genre: 'Historical Fiction',
+    status: 'read',
+    pages: 371,
+    cover: 'https://covers.openlibrary.org/b/isbn/9781594631931-L.jpg',
     blurb:
-      'A murder mystery unfolds as author Anthony Horowitz becomes an unlikely participant in a detective investigation.'
+      'Two boys growing up in Afghanistan are separated by betrayal and circumstance, and years later one must confront the past.'
   },
 
   {
     id: 51,
-    title: 'Magpie Murders',
-    author: 'Anthony Horowitz',
-    genre: 'Mystery',
-    status: 'read',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780062641542-L.jpg',
+    title: 'A Thousand Splendid Suns',
+    author: 'Khaled Hosseini',
+    genre: 'Historical Fiction',
+    status: 'tbr',
+    pages: 372,
+    cover: 'https://covers.openlibrary.org/b/isbn/9781594489501-L.jpg',
     blurb:
-      'A mystery writer dies after submitting his latest manuscript, leaving behind a puzzle that seems to contain clues to his own murder.'
+      'Two women from different generations form an unexpected bond while enduring decades of upheaval in Afghanistan.'
   },
 
   {
     id: 52,
-    title: 'Moonflower Murders',
-    author: 'Anthony Horowitz',
-    genre: 'Mystery',
+    title: 'The Book Thief',
+    author: 'Markus Zusak',
+    genre: 'Historical Fiction',
     status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780062641597-L.jpg',
+    pages: 592,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780375842207-L.jpg',
     blurb:
-      'A missing girl, an old mystery novel, and a retired editor come together in a puzzle where fiction may hold the key to reality.'
+      'Narrated by Death, this story follows Liesel, a young girl in Nazi Germany whose love for books becomes a quiet form of resistance and connection.'
   },
 
-  // =========================
-  // SELF DEVELOPMENT
-  // =========================
+  {
+    id: 53,
+    title: 'All the Light We Cannot See',
+    author: 'Anthony Doerr',
+    genre: 'Historical Fiction',
+    status: 'tbr',
+    pages: 544,
+    cover: 'https://covers.openlibrary.org/b/isbn/9781501173219-L.jpg',
+    blurb:
+      'A blind French girl and a gifted German boy find their lives intertwined during the Second World War.'
+  },
+
+  // =========================================
+  // RUSSIAN & EUROPEAN CLASSICS
+  // =========================================
 
   {
     id: 60,
-    title: 'Ikigai',
-    author: 'Héctor García & Francesc Miralles',
-    genre: 'Self Development',
-    status: 'read',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780143130727-L.jpg',
+    title: 'Crime and Punishment',
+    author: 'Fyodor Dostoevsky',
+    genre: 'Classic Fiction',
+    status: 'tbr',
+    pages: 671,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780143058144-L.jpg',
     blurb:
-      'A gentle exploration of the Japanese concept of ikigai and the habits, relationships, and perspectives that can contribute to a meaningful life.'
+      'A poor student commits a terrible crime and becomes consumed by guilt, fear, morality, and the possibility of redemption.'
   },
 
   {
     id: 61,
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    genre: 'Self Development',
+    title: 'The Brothers Karamazov',
+    author: 'Fyodor Dostoevsky',
+    genre: 'Classic Fiction',
     status: 'tbr',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg',
+    pages: 796,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780374528379-L.jpg',
     blurb:
-      'A practical guide to building better habits through small, consistent changes and designing an environment that supports them.'
+      'Three brothers with radically different personalities become entangled in family conflict, faith, morality, and a devastating crime.'
   },
 
-  // =========================
-  // LORD OF THE RINGS
-  // =========================
+  {
+    id: 62,
+    title: 'Anna Karenina',
+    author: 'Leo Tolstoy',
+    genre: 'Classic Fiction',
+    status: 'read',
+    pages: 864,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780143035008-L.jpg',
+    blurb:
+      'Love, marriage, society, and personal freedom collide in Tolstoy’s sweeping portrait of Russian aristocratic life.'
+  },
+
+  {
+    id: 63,
+    title: 'The Metamorphosis',
+    author: 'Franz Kafka',
+    genre: 'Classic Fiction',
+    status: 'tbr',
+    pages: 96,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780553213690-L.jpg',
+    blurb:
+      'Gregor Samsa wakes one morning to discover that he has transformed into a strange creature, forcing his family to confront their dependence on him.'
+  },
+
+  // =========================================
+  // INDIAN & SOUTH ASIAN FICTION
+  // =========================================
 
   {
     id: 70,
+    title: 'The Guide',
+    author: 'R.K. Narayan',
+    genre: 'Indian Fiction',
+    status: 'read',
+    pages: 224,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780143062906-L.jpg',
+    blurb:
+      'A charming railway guide becomes entangled in the life of a dancer and eventually finds himself transformed into an unlikely spiritual figure.'
+  },
+
+  {
+    id: 71,
+    title: 'Train to Pakistan',
+    author: 'Khushwant Singh',
+    genre: 'Historical Fiction',
+    status: 'tbr',
+    pages: 208,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780143065883-L.jpg',
+    blurb:
+      'A small village on the India-Pakistan border is transformed by the violence and uncertainty of Partition.'
+  },
+
+  {
+    id: 72,
+    title: 'The Palace of Illusions',
+    author: 'Chitra Banerjee Divakaruni',
+    genre: 'Historical Fiction',
+    status: 'tbr',
+    pages: 360,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780385523998-L.jpg',
+    blurb:
+      'The story of the Mahabharata is retold through the eyes of Draupadi, exploring ambition, identity, love, war, and destiny.'
+  },
+
+  // =========================================
+  // ESTABLISHED FANTASY
+  // =========================================
+
+  {
+    id: 80,
+    title: "Harry Potter and the Philosopher's Stone",
+    author: 'J.K. Rowling',
+    genre: 'Fantasy',
+    status: 'read',
+    pages: 352,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780747532743-L.jpg',
+    blurb:
+      'Harry Potter discovers that he is a wizard and begins his first year at Hogwarts, where friendship, magic, and an old enemy await him.'
+  },
+
+  {
+    id: 81,
     title: 'The Fellowship of the Ring',
     author: 'J.R.R. Tolkien',
     genre: 'Fantasy',
     status: 'tbr',
+    pages: 423,
     cover: 'https://covers.openlibrary.org/b/isbn/9780261103573-L.jpg',
     blurb:
       'Frodo Baggins inherits a dangerous ring and leaves the Shire with a fellowship determined to prevent it from falling into the wrong hands.'
   },
 
   {
-    id: 71,
+    id: 82,
     title: 'The Two Towers',
     author: 'J.R.R. Tolkien',
     genre: 'Fantasy',
     status: 'tbr',
+    pages: 352,
     cover: 'https://covers.openlibrary.org/b/isbn/9780261102361-L.jpg',
     blurb:
       'The members of the fellowship face separate battles as the forces of Middle-earth prepare for a growing war.'
   },
 
   {
-    id: 72,
+    id: 83,
     title: 'The Return of the King',
     author: 'J.R.R. Tolkien',
     genre: 'Fantasy',
     status: 'tbr',
+    pages: 416,
     cover: 'https://covers.openlibrary.org/b/isbn/9780261102378-L.jpg',
     blurb:
       'The final struggle for Middle-earth approaches as Frodo and Sam continue toward Mordor while the remaining fellowship fights for their world.'
   },
 
-  // =========================
-  // ORIGINAL READ
-  // =========================
+  {
+    id: 84,
+    title: 'The Lightning Thief',
+    author: 'Rick Riordan',
+    genre: 'Fantasy',
+    status: 'read',
+    pages: 377,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780786856299-L.jpg',
+    blurb:
+      'Percy Jackson discovers that the myths of ancient Greece are real and that he may be at the centre of a conflict between the gods.'
+  },
+
+  // =========================================
+  // NON-FICTION / PERSONAL DEVELOPMENT
+  // =========================================
 
   {
-    id: 4,
-    title: 'The Midnight Library',
-    author: 'Matt Haig',
-    genre: 'Fiction',
-    status: 'read',
-    cover: 'https://covers.openlibrary.org/b/isbn/0525559477-L.jpg',
+    id: 90,
+    title: 'Atomic Habits',
+    author: 'James Clear',
+    genre: 'Self Development',
+    status: 'tbr',
+    pages: 320,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg',
     blurb:
-      'Between life and death there is a library, and within that library, the chance to try out the lives one might have lived.'
+      'A practical guide to building better habits through small, consistent changes and designing an environment that supports them.'
   },
 
   {
-    id: 5,
-    title: 'Klara and the Sun',
-    author: 'Kazuo Ishiguro',
-    genre: 'Science Fiction',
+    id: 91,
+    title: 'The Diary of a Young Girl',
+    author: 'Anne Frank',
+    genre: 'Memoir',
     status: 'read',
-    cover: 'https://covers.openlibrary.org/b/isbn/0593396565-L.jpg',
+    pages: 283,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780553296983-L.jpg',
     blurb:
-      'Klara is an Artificial Friend who watches the world from a shop window. When she is chosen by a young girl, she learns how uncertain human love can be.'
+      'Anne Frank records her thoughts, fears, hopes, and daily life while hiding with her family during the Nazi occupation of the Netherlands.'
   },
 
   {
-    id: 6,
-    title: 'A Man Called Ove',
-    author: 'Fredrik Backman',
-    genre: 'Contemporary',
-    status: 'read',
-    cover: 'https://covers.openlibrary.org/b/isbn/1476738025-L.jpg',
+    id: 92,
+    title: 'Educated',
+    author: 'Tara Westover',
+    genre: 'Memoir',
+    status: 'tbr',
+    pages: 352,
+    cover: 'https://covers.openlibrary.org/b/isbn/9780399590504-L.jpg',
     blurb:
-      'A grumpy widower with strict routines finds his carefully ordered life disrupted by new neighbours, unexpected friendships, and a little community chaos.'
+      'Tara Westover recounts growing up in an isolated family and eventually finding her way into formal education and a new understanding of herself.'
   }
+
 ];
 
 export const genres = [
-  'Literary Fiction',
-  'Contemporary',
-  'Fantasy',
-  'Fiction',
-  'Science Fiction',
-  'Historical Fiction',
-  'Magical Realism',
-  'Mythology',
   'Classic Fiction',
   'Mystery',
+  'Crime',
+  'Fantasy',
+  'Historical Fiction',
+  'Indian Fiction',
+  'Memoir',
+  'Horror',
   'Self Development'
 ];
+```

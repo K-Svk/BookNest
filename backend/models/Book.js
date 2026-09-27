@@ -31,6 +31,16 @@ const bookSchema = new mongoose.Schema(
       type: Number,
     },
 
+    pages: {
+      type: Number,
+      default: 0,
+    },
+
+    quote: {
+      type: String,
+      default: "",
+    },
+
     averageRating: {
       type: Number,
       default: 0,
