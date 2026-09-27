@@ -1,4 +1,3 @@
-```javascript
 export const books = [
 
   // =========================================
@@ -685,4 +684,4 @@ export const genres = [
   'Horror',
   'Self Development'
 ];
-```
+
