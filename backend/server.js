@@ -1,14 +1,24 @@
+require("dotenv").config();
+
+const express = require("express");
+const cors = require("cors");
+
 const bookRoutes = require("./routes/bookRoutes");
 const authRoutes = require("./routes/authRoutes");
 const testRoutes = require("./routes/testRoutes");
 const libraryRoutes = require("./routes/libraryRoutes");
 const connectDB = require("./config/db");
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
 
+console.log(
+  "MONGO_URI exists:",
+  !!process.env.MONGO_URI
+);
 
-console.log("MONGO_URI exists:", !!process.env.MONGO_URI);
+console.log(
+  "JWT_SECRET exists:",
+  !!process.env.JWT_SECRET
+);
+
 const app = express();
 
 app.use(cors());
@@ -24,7 +34,11 @@ app.get("/", (req, res) => {
 });
 
 const PORT = 5000;
+
 connectDB();
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(
+    `Server running on port ${PORT}`
+  );
 });

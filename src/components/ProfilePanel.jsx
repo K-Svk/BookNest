@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Pencil,
   MapPin,
@@ -7,60 +7,15 @@ import {
   Heart,
   MessageCircle,
   Bookmark,
-  Star
-} from 'lucide-react';
+  Star,
+} from "lucide-react";
 
-import './ProfilePanel.css';
+import "./ProfilePanel.css";
 
-const favoriteGenres = [
-  'Literary Fiction',
-  'Contemporary',
-  'Fantasy',
-  'Romance',
-  'Mystery'
-];
+const API_URL = "http://localhost:5000/api";
 
-const recentReviews = [
-  {
-    title: 'The Midnight Library',
-    author: 'Matt Haig',
-    rating: 4,
-    review:
-      'A quietly beautiful reminder that the lives we imagine are rarely as simple as they seem.'
-  },
-  {
-    title: "A Good Girl's Guide to Murder",
-    author: 'Holly Jackson',
-    rating: 5,
-    review:
-      'Fast, clever and impossible to put down. The kind of mystery that makes you want to keep guessing.'
-  },
-  {
-    title: 'The Seven Husbands of Evelyn Hugo',
-    author: 'Taylor Jenkins Reid',
-    rating: 4,
-    review:
-      'Messy, glamorous and unexpectedly emotional. Evelyn Hugo is a character that stays with you.'
-  }
-];
-
-const hypedBooks = [
-  {
-    title: 'The Housemaid',
-    author: 'Freida McFadden',
-    cover: 'https://covers.openlibrary.org/b/isbn/9781460760685-M.jpg'
-  },
-  {
-    title: 'Divine Rivals',
-    author: 'Rebecca Ross',
-    cover: 'https://covers.openlibrary.org/b/isbn/9781250857430-M.jpg'
-  },
-  {
-    title: 'Six of Crows',
-    author: 'Leigh Bardugo',
-    cover: 'https://covers.openlibrary.org/b/isbn/9781250076960-M.jpg'
-  }
-];
+const DEFAULT_PROFILE_PICTURE =
+  "https://i.pinimg.com/736x/91/4c/5b/914c5b3ef2b9fbd0e9dc1c12b7b9c1a2.jpg";
 
 function Rating({ rating }) {
   return (
@@ -69,7 +24,7 @@ function Rating({ rating }) {
         <Star
           key={star}
           size={14}
-          fill={star <= rating ? 'currentColor' : 'none'}
+          fill={star <= Number(rating) ? "currentColor" : "none"}
         />
       ))}
     </div>
@@ -77,17 +32,199 @@ function Rating({ rating }) {
 }
 
 export default function ProfilePanel() {
+  const [user, setUser] = useState(null);
+  const [library, setLibrary] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("booknestToken");
+
+      if (!token) {
+        console.log("PROFILE: No BookNest token found.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const profileResponse = await fetch(
+          `${API_URL}/auth/me`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!profileResponse.ok) {
+          const errorData = await profileResponse.json().catch(() => ({}));
+
+          console.error(
+            "PROFILE REQUEST FAILED:",
+            profileResponse.status,
+            errorData
+          );
+
+          throw new Error(
+            errorData.message || "Failed to fetch profile"
+          );
+        }
+
+        const profileData = await profileResponse.json();
+
+        const libraryResponse = await fetch(
+          `${API_URL}/library`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!libraryResponse.ok) {
+          const errorData = await libraryResponse.json().catch(() => ({}));
+
+          console.error(
+            "LIBRARY REQUEST FAILED:",
+            libraryResponse.status,
+            errorData
+          );
+
+          throw new Error(
+            errorData.message || "Failed to fetch library"
+          );
+        }
+
+        const libraryData = await libraryResponse.json();
+
+        console.log("BOOKNEST PROFILE:", profileData);
+        console.log("BOOKNEST LIBRARY:", libraryData);
+
+        setUser(profileData);
+        setLibrary(Array.isArray(libraryData) ? libraryData : []);
+      } catch (error) {
+        console.error("FAILED TO LOAD PROFILE:", error);
+        setUser(null);
+        setLibrary([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const readBooks = useMemo(
+    () =>
+      library.filter(
+        (entry) => entry.status === "read"
+      ),
+    [library]
+  );
+
+  const tbrBooks = useMemo(
+    () =>
+      library.filter(
+        (entry) => entry.status === "tbr"
+      ),
+    [library]
+  );
+
+  const currentlyReading = useMemo(
+    () =>
+      library.find(
+        (entry) => entry.status === "currently"
+      ),
+    [library]
+  );
+
+  const ratedBooks = useMemo(
+    () =>
+      readBooks
+        .filter(
+          (entry) =>
+            Number(entry.rating) > 0
+        )
+        .sort((a, b) => {
+          const dateA = new Date(
+            a.updatedAt ||
+              a.createdAt ||
+              0
+          );
+
+          const dateB = new Date(
+            b.updatedAt ||
+              b.createdAt ||
+              0
+          );
+
+          return dateB - dateA;
+        }),
+    [readBooks]
+  );
+
+  const joinedYear = user?.createdAt
+    ? new Date(user.createdAt).getFullYear()
+    : "";
+
+  const favoriteGenres =
+    user?.favoriteGenres?.length > 0
+      ? user.favoriteGenres
+      : ["No genres selected yet"];
+
+  const profilePicture =
+    user?.profilePicture ||
+    DEFAULT_PROFILE_PICTURE;
+
+  if (loading) {
+    return (
+      <section className="profile-page">
+        <div className="profile-hero">
+          <div className="profile-intro">
+            <p className="profile-eyebrow">
+              BOOKNEST MEMBER
+            </p>
+
+            <h1>Loading profile...</h1>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section className="profile-page">
+        <div className="profile-hero">
+          <div className="profile-intro">
+            <p className="profile-eyebrow">
+              BOOKNEST MEMBER
+            </p>
+
+            <h1>Profile unavailable</h1>
+
+            <p className="profile-bio">
+              Please log in to view your BookNest
+              profile.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="profile-page">
-
-      {/* PROFILE HEADER */}
       <div className="profile-hero">
-
         <div className="profile-avatar-wrap">
           <img
             className="profile-avatar"
-            src="https://i.pinimg.com/736x/91/4c/5b/914c5b3ef2b9fbd0e9dc1c12b7b9c1a2.jpg"
-            alt="Ayvarhs profile"
+            src={profilePicture}
+            alt={`${user.username}'s profile`}
           />
 
           <button
@@ -101,15 +238,13 @@ export default function ProfilePanel() {
         </div>
 
         <div className="profile-intro">
-
           <div className="profile-name-row">
-
             <div>
               <p className="profile-eyebrow">
                 BOOKNEST MEMBER
               </p>
 
-              <h1>Ayvarhs</h1>
+              <h1>{user.username}</h1>
             </div>
 
             <button
@@ -119,17 +254,14 @@ export default function ProfilePanel() {
               <Pencil size={15} />
               Edit profile
             </button>
-
           </div>
 
           <p className="profile-bio">
-            Probably reading when I should be doing something else.
-            <br />
-            Currently collecting fictional people and questionable decisions.
+            {user.bio ||
+              "Probably reading when I should be doing something else."}
           </p>
 
           <div className="profile-meta">
-
             <span>
               <MapPin size={15} />
               Bangalore, India
@@ -137,23 +269,18 @@ export default function ProfilePanel() {
 
             <span>
               <CalendarDays size={15} />
-              Joined 2026
+              Joined {joinedYear || "recently"}
             </span>
-
           </div>
-
         </div>
       </div>
 
-
-      {/* PROFILE STATS */}
       <div className="profile-stats">
-
         <div className="profile-stat">
           <BookOpen size={19} />
 
           <div>
-            <strong>37</strong>
+            <strong>{readBooks.length}</strong>
             <span>Books read</span>
           </div>
         </div>
@@ -162,7 +289,7 @@ export default function ProfilePanel() {
           <Bookmark size={19} />
 
           <div>
-            <strong>24</strong>
+            <strong>{tbrBooks.length}</strong>
             <span>On TBR</span>
           </div>
         </div>
@@ -171,7 +298,7 @@ export default function ProfilePanel() {
           <Heart size={19} />
 
           <div>
-            <strong>18</strong>
+            <strong>0</strong>
             <span>Favourites</span>
           </div>
         </div>
@@ -180,25 +307,16 @@ export default function ProfilePanel() {
           <MessageCircle size={19} />
 
           <div>
-            <strong>12</strong>
-            <span>Reviews</span>
+            <strong>{ratedBooks.length}</strong>
+            <span>Rated books</span>
           </div>
         </div>
-
       </div>
 
-
-      {/* PROFILE CONTENT */}
       <div className="profile-content">
-
-        {/* LEFT COLUMN */}
         <div className="profile-main-column">
-
-          {/* FAVORITE GENRES */}
           <section className="profile-section">
-
             <div className="profile-section-heading">
-
               <div>
                 <p className="profile-section-kicker">
                   MY READING TASTE
@@ -210,11 +328,9 @@ export default function ProfilePanel() {
               <span className="profile-section-note">
                 what I keep coming back to
               </span>
-
             </div>
 
             <div className="genre-list">
-
               {favoriteGenres.map((genre) => (
                 <span
                   className="genre-pill"
@@ -223,17 +339,11 @@ export default function ProfilePanel() {
                   {genre}
                 </span>
               ))}
-
             </div>
-
           </section>
 
-
-          {/* RECENT REVIEWS */}
           <section className="profile-section">
-
             <div className="profile-section-heading">
-
               <div>
                 <p className="profile-section-kicker">
                   FROM THE READING JOURNAL
@@ -248,94 +358,155 @@ export default function ProfilePanel() {
               >
                 View all
               </button>
-
             </div>
 
             <div className="review-list">
+              {ratedBooks.length > 0 ? (
+                ratedBooks
+                  .slice(0, 3)
+                  .map((entry) => (
+                    <article
+                      className="review-card"
+                      key={entry._id}
+                    >
+                      <div className="review-card-top">
+                        <div>
+                          <h3>
+                            {entry.book?.title ||
+                              "Untitled book"}
+                          </h3>
 
-              {recentReviews.map((book) => (
-                <article
-                  className="review-card"
-                  key={book.title}
-                >
+                          <p>
+                            {entry.book?.author ||
+                              "Unknown author"}
+                          </p>
+                        </div>
 
+                        <Rating
+                          rating={entry.rating}
+                        />
+                      </div>
+
+                      <p className="review-text">
+                        You rated this book{" "}
+                        {entry.rating} out of 5.
+                      </p>
+
+                      <div className="review-footer">
+                        <span>
+                          Rated on BookNest
+                        </span>
+
+                        <MessageCircle size={14} />
+                      </div>
+                    </article>
+                  ))
+              ) : (
+                <article className="review-card">
                   <div className="review-card-top">
-
                     <div>
-                      <h3>{book.title}</h3>
-                      <p>{book.author}</p>
+                      <h3>No ratings yet</h3>
+
+                      <p>
+                        Your reading journal is
+                        waiting.
+                      </p>
                     </div>
-
-                    <Rating rating={book.rating} />
-
                   </div>
 
                   <p className="review-text">
-                    “{book.review}”
+                    Rate books you've read and
+                    they'll appear here.
                   </p>
-
-                  <div className="review-footer">
-                    <span>Reviewed recently</span>
-                    <MessageCircle size={14} />
-                  </div>
-
                 </article>
-              ))}
-
+              )}
             </div>
-
           </section>
-
         </div>
 
-
-        {/* RIGHT COLUMN */}
         <aside className="profile-side-column">
-
-          {/* CURRENTLY READING */}
           <section className="profile-mini-card">
-
             <p className="profile-section-kicker">
               RIGHT NOW
             </p>
 
             <h2>Currently reading</h2>
 
-            <div className="currently-reading-profile">
+            {currentlyReading?.book ? (
+              <div className="currently-reading-profile">
+                <div className="mini-book-cover">
+                  {currentlyReading.book
+                    .coverImage ? (
+                    <img
+                      src={
+                        currentlyReading.book
+                          .coverImage
+                      }
+                      alt={
+                        currentlyReading.book
+                          .title
+                      }
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <div className="mini-book-spine"></div>
 
-              <div className="mini-book-cover">
-
-                <div className="mini-book-spine"></div>
-
-                <div className="mini-book-title">
-                  The
-                  <br />
-                  Midnight
-                  <br />
-                  Library
+                      <div className="mini-book-title">
+                        {
+                          currentlyReading.book
+                            .title
+                        }
+                      </div>
+                    </>
+                  )}
                 </div>
 
+                <div>
+                  <h3>
+                    {
+                      currentlyReading.book
+                        .title
+                    }
+                  </h3>
+
+                  <p>
+                    {
+                      currentlyReading.book
+                        .author
+                    }
+                  </p>
+
+                  <span className="reading-progress-profile">
+                    {currentlyReading.book
+                      .pages
+                      ? `${Math.round(
+                          (currentlyReading.currentPage /
+                            currentlyReading
+                              .book
+                              .pages) *
+                            100
+                        )}% read`
+                      : `${
+                          currentlyReading.currentPage ||
+                          0
+                        } pages read`}
+                  </span>
+                </div>
               </div>
-
-              <div>
-                <h3>The Midnight Library</h3>
-                <p>Matt Haig</p>
-
-                <span className="reading-progress-profile">
-                  63% read
-                </span>
-              </div>
-
-            </div>
-
+            ) : (
+              <p className="profile-bio">
+                Nothing currently reading.
+              </p>
+            )}
           </section>
 
-
-          {/* HYPED BOOKS */}
           <section className="profile-mini-card">
-
             <div className="profile-section-heading compact">
-
               <div>
                 <p className="profile-section-kicker">
                   ON MY RADAR
@@ -343,56 +514,70 @@ export default function ProfilePanel() {
 
                 <h2>Hyped books</h2>
               </div>
-
             </div>
 
             <div className="hyped-books">
+              {tbrBooks.length > 0 ? (
+                tbrBooks
+                  .slice(0, 3)
+                  .map((entry) => (
+                    <div
+                      className="hyped-book"
+                      key={entry._id}
+                    >
+                      {entry.book?.coverImage ? (
+                        <img
+                          src={
+                            entry.book.coverImage
+                          }
+                          alt={
+                            entry.book.title
+                          }
+                        />
+                      ) : (
+                        <div className="mini-book-cover">
+                          <div className="mini-book-spine"></div>
 
-              {hypedBooks.map((book) => (
-                <div
-                  className="hyped-book"
-                  key={book.title}
-                >
+                          <div className="mini-book-title">
+                            {entry.book?.title}
+                          </div>
+                        </div>
+                      )}
 
-                  <img
-                    src={book.cover}
-                    alt={book.title}
-                  />
+                      <div>
+                        <h3>
+                          {entry.book?.title}
+                        </h3>
 
-                  <div>
-                    <h3>{book.title}</h3>
-                    <p>{book.author}</p>
-                  </div>
-
-                </div>
-              ))}
-
+                        <p>
+                          {entry.book?.author ||
+                            "Unknown author"}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <p className="profile-bio">
+                  Your TBR is empty.
+                </p>
+              )}
             </div>
-
           </section>
 
-
-          {/* QUOTE */}
           <section className="profile-note-card">
-
             <div className="note-decoration">
               “
             </div>
 
             <p>
-              A room without books is like a body without a soul.
+              A room without books is like a
+              body without a soul.
             </p>
 
-            <span>
-              — Cicero
-            </span>
-
+            <span>— Cicero</span>
           </section>
-
         </aside>
-
       </div>
-
     </section>
   );
 }

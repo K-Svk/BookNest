@@ -1,10 +1,33 @@
 const API_URL = "http://localhost:5000/api";
 
-export const api = {
-  // =========================================
-  // BOOKS
-  // =========================================
+const getToken = () => {
+  return localStorage.getItem("booknestToken");
+};
 
+const getAuthHeaders = () => {
+  const token = getToken();
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+};
+
+const normalizeBook = (book) => {
+  if (!book) return null;
+
+  return {
+    ...book,
+    id: book._id || book.id,
+    cover: book.coverImage || book.cover || "",
+    blurb: book.description || book.blurb || "",
+    genre: book.genres || book.genre || [],
+    year: book.publishedYear || book.year,
+    rating: book.averageRating || book.rating || 0,
+  };
+};
+
+export const api = {
   getBooks: async () => {
     const response = await fetch(`${API_URL}/books`);
 
@@ -14,22 +37,11 @@ export const api = {
 
     const books = await response.json();
 
-    return books.map((book) => ({
-      ...book,
-
-      id: book._id,
-      cover: book.coverImage || "",
-      blurb: book.description || "",
-      genre: book.genres || [],
-      year: book.publishedYear,
-      rating: book.averageRating || 0,
-    }));
+    return books.map(normalizeBook);
   },
 
   getBook: async (id) => {
-    const response = await fetch(
-      `${API_URL}/books/${id}`
-    );
+    const response = await fetch(`${API_URL}/books/${id}`);
 
     if (!response.ok) {
       throw new Error("Failed to fetch book");
@@ -37,48 +49,41 @@ export const api = {
 
     const book = await response.json();
 
-    return {
-      ...book,
-
-      id: book._id,
-      cover: book.coverImage || "",
-      blurb: book.description || "",
-      genre: book.genres || [],
-      year: book.publishedYear,
-      rating: book.averageRating || 0,
-    };
+    return normalizeBook(book);
   },
 
-
-  // =========================================
-  // USER LIBRARY
-  // =========================================
-
   getLibrary: async () => {
-    const token = localStorage.getItem(
-      "booknestToken"
-    );
+    const token = getToken();
 
-    const response = await fetch(
-      `${API_URL}/library`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    if (!token) {
+      throw new Error("You are not logged in");
+    }
+
+    const response = await fetch(`${API_URL}/library`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch library");
+      let errorMessage = "Failed to fetch library";
+
+      try {
+        const error = await response.json();
+
+        if (error.message) {
+          errorMessage = error.message;
+        }
+      } catch {
+        // Ignore JSON parsing errors
+      }
+
+      throw new Error(errorMessage);
     }
 
     return response.json();
   },
-
-
-  // =========================================
-  // ADD BOOK TO LIBRARY
-  // =========================================
 
   addToLibrary: async ({
     bookId,
@@ -86,108 +91,114 @@ export const api = {
     currentPage = 0,
     rating = 0,
   }) => {
-    const token = localStorage.getItem(
-      "booknestToken"
-    );
+    const token = getToken();
 
-    const response = await fetch(
-      `${API_URL}/library`,
-      {
-        method: "POST",
+    if (!token) {
+      throw new Error("You are not logged in");
+    }
 
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+    if (!bookId) {
+      throw new Error("Book ID is required");
+    }
 
-        body: JSON.stringify({
-          bookId,
-          status,
-          currentPage,
-          rating,
-        }),
-      }
-    );
+    const response = await fetch(`${API_URL}/library`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        bookId,
+        status,
+        currentPage,
+        rating,
+      }),
+    });
 
     if (!response.ok) {
-      const error = await response.json();
+      let errorMessage = "Failed to add book to library";
 
-      throw new Error(
-        error.message ||
-          "Failed to add book to library"
-      );
+      try {
+        const error = await response.json();
+
+        if (error.message) {
+          errorMessage = error.message;
+        }
+      } catch {
+        // Ignore JSON parsing errors
+      }
+
+      throw new Error(errorMessage);
     }
 
     return response.json();
   },
 
+  updateLibraryEntry: async (bookId, updates) => {
+    const token = getToken();
 
-  // =========================================
-  // UPDATE LIBRARY ENTRY
-  // =========================================
+    if (!token) {
+      throw new Error("You are not logged in");
+    }
 
-  updateLibraryEntry: async (
-    id,
-    updates
-  ) => {
-    const token = localStorage.getItem(
-      "booknestToken"
-    );
+    if (!bookId) {
+      throw new Error("Book ID is required");
+    }
 
-    const response = await fetch(
-      `${API_URL}/library/${id}`,
-      {
-        method: "PUT",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-
-        body: JSON.stringify(updates),
-      }
-    );
+    const response = await fetch(`${API_URL}/library/${bookId}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(updates),
+    });
 
     if (!response.ok) {
-      const error = await response.json();
+      let errorMessage = "Failed to update library entry";
 
-      throw new Error(
-        error.message ||
-          "Failed to update library entry"
-      );
+      try {
+        const error = await response.json();
+
+        if (error.message) {
+          errorMessage = error.message;
+        }
+      } catch {
+        // Ignore JSON parsing errors
+      }
+
+      throw new Error(errorMessage);
     }
 
     return response.json();
   },
 
+  removeFromLibrary: async (bookId) => {
+    const token = getToken();
 
-  // =========================================
-  // REMOVE FROM LIBRARY
-  // =========================================
+    if (!token) {
+      throw new Error("You are not logged in");
+    }
 
-  removeFromLibrary: async (id) => {
-    const token = localStorage.getItem(
-      "booknestToken"
-    );
+    if (!bookId) {
+      throw new Error("Book ID is required");
+    }
 
-    const response = await fetch(
-      `${API_URL}/library/${id}`,
-      {
-        method: "DELETE",
-
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await fetch(`${API_URL}/library/${bookId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
-      const error = await response.json();
+      let errorMessage = "Failed to remove book from library";
 
-      throw new Error(
-        error.message ||
-          "Failed to remove book from library"
-      );
+      try {
+        const error = await response.json();
+
+        if (error.message) {
+          errorMessage = error.message;
+        }
+      } catch {
+        // Ignore JSON parsing errors
+      }
+
+      throw new Error(errorMessage);
     }
 
     return response.json();

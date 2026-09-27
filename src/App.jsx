@@ -1,25 +1,14 @@
 import ProfilePanel from "./components/ProfilePanel";
 import { api } from "./services/api";
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { books } from "./data/books";
+import React, { useEffect, useMemo, useState } from "react";
 import Topbar from "./components/Topbar";
 import BookCard from "./components/BookCard";
 import BookModal from "./components/BookModal";
 import SettingsPanel from "./components/SettingsPanel";
-
 import LoginPage from "./components/LoginPage";
 import GenreSelection from "./components/GenreSelection";
 import BookRatingPage from "./components/BookRatingPage";
 import RecommendationsPage from "./components/RecommendationsPage";
-
-
-// =====================================================
-// SHELF
-// =====================================================
 
 function Shelf({
   title,
@@ -28,8 +17,6 @@ function Shelf({
   onOpen,
   reverse = false,
 }) {
-  const carouselItems = [...items, ...items];
-
   return (
     <section className="shelf-section">
       <div className="section-heading">
@@ -43,44 +30,42 @@ function Shelf({
         </span>
       </div>
 
-      <div className="shelf-viewport">
-        <div
-          className={`shelf-row ${
-            reverse ? "carousel-reverse" : ""
-          }`}
-        >
-          {carouselItems.map((book, index) => (
-            <BookCard
-              key={`${book.id}-${index}`}
-              book={book}
-              onOpen={onOpen}
-            />
-          ))}
+      {items.length === 0 ? (
+        <div className="empty-shelf">
+          <p>No books here yet.</p>
         </div>
-      </div>
+      ) : (
+        <div className="shelf-viewport">
+          <div
+            className={`shelf-row ${
+              reverse ? "carousel-reverse" : ""
+            }`}
+          >
+            {items.map((book) => (
+              <BookCard
+                key={book.id}
+                book={book}
+                onOpen={onOpen}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
-
-
-// =====================================================
-// CURRENTLY READING
-// =====================================================
 
 function CurrentlyReading({ reading }) {
   if (!reading) return null;
 
   const { book, page } = reading;
-
   const totalPages = book.pages || 300;
 
   const progress = Math.min(
     100,
     Math.max(
       1,
-      Math.round(
-        (page / totalPages) * 100
-      )
+      Math.round((page / totalPages) * 100)
     )
   );
 
@@ -115,9 +100,7 @@ function CurrentlyReading({ reading }) {
           </div>
 
           <div className="reading-progress-meta">
-            <span>
-              {progress}% through
-            </span>
+            <span>{progress}% through</span>
 
             <span>
               {Math.max(
@@ -154,81 +137,21 @@ function CurrentlyReading({ reading }) {
   );
 }
 
-
-// =====================================================
-// APP
-// =====================================================
-
 export default function App() {
+  const [mongoBooks, setMongoBooks] = useState([]);
+  const [booksLoading, setBooksLoading] = useState(true);
 
-  // ===================================================
-  // BOOK CATALOGUE
-  // ===================================================
-
-  const [mongoBooks, setMongoBooks] =
-    useState([]);
-
-  const [booksLoading, setBooksLoading] =
-    useState(true);
-
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const data =
-          await api.getBooks();
-
-        console.log(
-          "BOOKS FROM MONGODB:",
-          data
-        );
-
-        setMongoBooks(data);
-
-      } catch (error) {
-        console.error(
-          "FAILED TO FETCH BOOKS:",
-          error
-        );
-
-      } finally {
-        setBooksLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, []);
-
-
-  // ===================================================
-  // USER LIBRARY
-  // ===================================================
-
-  const [userLibrary, setUserLibrary] =
-    useState([]);
-
-  const [libraryLoading, setLibraryLoading] =
-    useState(true);
-
-
-  // ===================================================
-  // ONBOARDING STORAGE
-  // ===================================================
+  const [userLibrary, setUserLibrary] = useState([]);
+  const [libraryLoading, setLibraryLoading] = useState(true);
 
   const existingUser =
-    localStorage.getItem(
-      "booknestUser"
-    );
+    localStorage.getItem("booknestUser");
 
   const savedGenres =
-    localStorage.getItem(
-      "booknestGenres"
-    );
+    localStorage.getItem("booknestGenres");
 
   const savedRatings =
-    localStorage.getItem(
-      "booknestRatings"
-    );
-
+    localStorage.getItem("booknestRatings");
 
   const [onboardingStep, setOnboardingStep] =
     useState(() => {
@@ -247,422 +170,285 @@ export default function App() {
       return "complete";
     });
 
-
   const [onboardingGenres, setOnboardingGenres] =
     useState(() => {
       if (!savedGenres) return [];
 
       try {
-        return JSON.parse(
-          savedGenres
-        );
+        return JSON.parse(savedGenres);
       } catch {
         return [];
       }
     });
-
 
   const [onboardingRatings, setOnboardingRatings] =
     useState(() => {
       if (!savedRatings) return {};
 
       try {
-        return JSON.parse(
-          savedRatings
-        );
+        return JSON.parse(savedRatings);
       } catch {
         return {};
       }
     });
 
+  const [query, setQuery] = useState("");
+  const [section, setSection] = useState("home");
+  const [modal, setModal] = useState(null);
+  const [settings, setSettings] = useState(false);
+  const [theme, setTheme] = useState("light");
 
-  // ===================================================
-  // FETCH USER LIBRARY
-  // ===================================================
+  const [selectedGenres, setSelectedGenres] =
+    useState([
+      "Literary Fiction",
+      "Contemporary",
+      "Fantasy",
+    ]);
 
   useEffect(() => {
-    const token =
-      localStorage.getItem(
-        "booknestToken"
-      );
+    const fetchBooks = async () => {
+      try {
+        const data = await api.getBooks();
 
-    // No token = no authenticated library
+        console.log(
+          "BOOKS FROM MONGODB:",
+          data
+        );
+
+        setMongoBooks(data);
+      } catch (error) {
+        console.error(
+          "FAILED TO FETCH BOOKS:",
+          error
+        );
+      } finally {
+        setBooksLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
+
+  const fetchUserLibrary = async () => {
+    const token =
+      localStorage.getItem("booknestToken");
+
     if (!token) {
+      setUserLibrary([]);
       setLibraryLoading(false);
       return;
     }
 
-    const fetchLibrary = async () => {
-      try {
-        const data =
-          await api.getLibrary();
+    try {
+      setLibraryLoading(true);
 
-        console.log(
-          "USER LIBRARY:",
-          data
-        );
+      const data = await api.getLibrary();
 
-        setUserLibrary(data);
+      console.log(
+        "USER LIBRARY:",
+        data
+      );
 
-      } catch (error) {
-        console.error(
-          "FAILED TO FETCH USER LIBRARY:",
-          error
-        );
+      setUserLibrary(
+        Array.isArray(data) ? data : []
+      );
+    } catch (error) {
+      console.error(
+        "FAILED TO FETCH USER LIBRARY:",
+        error
+      );
 
-      } finally {
-        setLibraryLoading(false);
-      }
-    };
+      setUserLibrary([]);
+    } finally {
+      setLibraryLoading(false);
+    }
+  };
 
-    /*
-      We fetch once the user reaches the
-      actual application.
-
-      This ensures the token has already
-      been created by LoginPage.
-    */
-    if (onboardingStep === "complete") {
-      fetchLibrary();
+  useEffect(() => {
+    if (onboardingStep !== "complete") {
+      setUserLibrary([]);
+      setLibraryLoading(false);
+      return;
     }
 
+    fetchUserLibrary();
   }, [onboardingStep]);
 
-
-  // ===================================================
-  // BUILD BOOK LIBRARY
-  // ===================================================
-
   const library = useMemo(() => {
+    const libraryMap = new Map();
 
-    /*
-      MongoDB is now the main catalogue.
+    userLibrary.forEach((entry) => {
+      const bookId =
+        entry?.book?._id ||
+        entry?.book?.id;
 
-      If it isn't available yet, use the
-      original frontend library as a fallback.
-    */
-
-    const sourceBooks =
-      mongoBooks.length
-        ? mongoBooks
-        : books;
-
-
-    /*
-      Create a quick lookup of the user's
-      LibraryEntries.
-
-      book._id → LibraryEntry
-    */
-
-    const libraryMap =
-      new Map();
-
-    userLibrary.forEach(
-      (entry) => {
-        if (entry.book?._id) {
-          libraryMap.set(
-            entry.book._id,
-            entry
-          );
-        }
+      if (bookId) {
+        libraryMap.set(
+          String(bookId),
+          entry
+        );
       }
-    );
+    });
 
+    return mongoBooks.map((book) => {
+      const bookId =
+        book.id || book._id;
 
-    return sourceBooks.map(
-      (remoteBook) => {
+      const normalizedBookId =
+        String(bookId);
 
-        const matchingLocalBook =
-          books.find(
-            (localBook) =>
-              localBook.title ===
-                remoteBook.title &&
-              localBook.author ===
-                remoteBook.author
-          );
+      const entry =
+        libraryMap.get(
+          normalizedBookId
+        );
 
+      return {
+        ...book,
 
-        const entry =
-          libraryMap.get(
-            remoteBook.id ||
-              remoteBook._id
-          );
+        id: bookId,
 
+        cover:
+          book.cover ||
+          book.coverImage ||
+          "",
 
-        /*
-          LibraryEntry status is the
-          persistent user status.
+        blurb:
+          book.blurb ||
+          book.description ||
+          "",
 
-          Until a user has library entries,
-          we retain the old local status as
-          a temporary fallback so your existing
-          demo shelves don't suddenly disappear.
-        */
+        description:
+          book.description ||
+          book.blurb ||
+          "",
 
-        const status =
-          entry?.status ??
-          matchingLocalBook?.status ??
-          null;
+        genre:
+          book.genre ||
+          book.genres ||
+          [],
 
+        genres:
+          book.genres ||
+          book.genre ||
+          [],
 
-        return {
-          ...matchingLocalBook,
-          ...remoteBook,
+        year:
+          book.year ||
+          book.publishedYear,
 
-          id:
-            remoteBook.id ||
-            remoteBook._id ||
-            matchingLocalBook?.id,
+        publishedYear:
+          book.publishedYear ||
+          book.year,
 
-          cover:
-            remoteBook.cover ||
-            remoteBook.coverImage ||
-            matchingLocalBook?.cover ||
-            "",
+        pages:
+          book.pages || 0,
 
-          blurb:
-            remoteBook.blurb ||
-            remoteBook.description ||
-            matchingLocalBook?.blurb ||
-            "",
+        quote:
+          book.quote || "",
 
-          description:
-            remoteBook.description ||
-            matchingLocalBook?.description ||
-            "",
+        rating:
+          book.rating ||
+          book.averageRating ||
+          0,
 
-          genre:
-            remoteBook.genre ||
-            remoteBook.genres ||
-            matchingLocalBook?.genre ||
-            [],
+        status:
+          entry?.status || null,
 
-          genres:
-            remoteBook.genres ||
-            matchingLocalBook?.genres ||
-            [],
+        libraryEntryId:
+          entry?._id || null,
 
-          year:
-            remoteBook.year ||
-            remoteBook.publishedYear ||
-            matchingLocalBook?.year,
+        currentPage:
+          entry?.currentPage || 0,
 
-          publishedYear:
-            remoteBook.publishedYear ||
-            matchingLocalBook?.publishedYear,
+        userRating:
+          entry?.rating || 0,
+      };
+    });
+  }, [mongoBooks, userLibrary]);
 
-          pages:
-            remoteBook.pages ||
-            matchingLocalBook?.pages ||
-            0,
+  const filtered = useMemo(() => {
+    const normalizedQuery =
+      query.trim().toLowerCase();
 
-          quote:
-            remoteBook.quote ||
-            matchingLocalBook?.quote ||
-            "",
+    if (!normalizedQuery) {
+      return library;
+    }
 
-          rating:
-            remoteBook.rating ||
-            remoteBook.averageRating ||
-            matchingLocalBook?.rating ||
-            0,
+    return library.filter((book) => {
+      const title =
+        book.title || "";
 
-          /*
-            USER-SPECIFIC DATA
-          */
+      const author =
+        book.author || "";
 
-          status,
+      const genres =
+        Array.isArray(book.genre)
+          ? book.genre.join(" ")
+          : book.genre || "";
 
-          libraryEntryId:
-            entry?._id || null,
+      const description =
+        book.description ||
+        book.blurb ||
+        "";
 
-          currentPage:
-            entry?.currentPage || 0,
+      const searchableText =
+        `${title} ${author} ${genres} ${description}`.toLowerCase();
 
-          userRating:
-            entry?.rating || 0,
-        };
-      }
-    );
+      return searchableText.includes(
+        normalizedQuery
+      );
+    });
+  }, [library, query]);
 
-  }, [
-    mongoBooks,
-    userLibrary,
-  ]);
-
-
-  // ===================================================
-  // SEARCH
-  // ===================================================
-
-  const [query, setQuery] =
-    useState("");
-
-
-  const filtered = useMemo(
-    () =>
-      library.filter(
-        (book) =>
-          `${book.title} ${
-            book.author
-          } ${
-            Array.isArray(book.genre)
-              ? book.genre.join(" ")
-              : book.genre || ""
-          }`
-            .toLowerCase()
-            .includes(
-              query.toLowerCase()
-            )
-      ),
-    [library, query]
-  );
-
-
-  // ===================================================
-  // PERSONAL SHELVES
-  // ===================================================
-
-  const tbr =
-    filtered.filter(
+  const tbr = useMemo(() => {
+    return filtered.filter(
       (book) =>
         book.status === "tbr"
     );
+  }, [filtered]);
 
-
-  const read =
-    filtered.filter(
+  const read = useMemo(() => {
+    return filtered.filter(
       (book) =>
         book.status === "read"
     );
-
+  }, [filtered]);
 
   const currentlyReadingBooks =
-    library.filter(
-      (book) =>
-        book.status === "currently"
-    );
-
-
-  // ===================================================
-  // CURRENTLY READING BOOK
-  // ===================================================
-
-  const [randomReadingBook] =
-    useState(() => null);
-
+    useMemo(() => {
+      return library.filter(
+        (book) =>
+          book.status === "currently"
+      );
+    }, [library]);
 
   const currentlyReading =
     useMemo(() => {
-
       if (
-        currentlyReadingBooks.length
+        currentlyReadingBooks.length === 0
       ) {
-        const book =
-          currentlyReadingBooks[0];
-
-        return {
-          book,
-          page:
-            book.currentPage || 1,
-        };
-      }
-
-
-      /*
-        Temporary fallback to the old
-        frontend data if the user hasn't
-        created a MongoDB Currently Reading
-        entry yet.
-      */
-
-      const localPool =
-        books.filter(
-          (book) =>
-            book.status ===
-            "currently"
-        );
-
-
-      if (!localPool.length) {
         return null;
       }
 
-
       const book =
-        randomReadingBook ||
-        localPool[
-          Math.floor(
-            Math.random() *
-              localPool.length
-          )
-        ];
-
-
-      const totalPages =
-        book.pages || 300;
-
-
-      const page =
-        Math.floor(
-          Math.random() *
-            Math.max(
-              1,
-              totalPages - 40
-            )
-        ) + 30;
-
+        currentlyReadingBooks[0];
 
       return {
         book,
-        page,
+        page:
+          book.currentPage || 1,
       };
+    }, [currentlyReadingBooks]);
 
-    }, [
-      currentlyReadingBooks,
-      randomReadingBook,
-    ]);
+  const handleLoginComplete = () => {
+    setUserLibrary([]);
+    setSection("home");
+    setQuery("");
+    setModal(null);
+    setSettings(false);
 
-
-  // ===================================================
-  // UI STATE
-  // ===================================================
-
-  const [section, setSection] =
-    useState("home");
-
-  const [modal, setModal] =
-    useState(null);
-
-  const [settings, setSettings] =
-    useState(false);
-
-  const [theme, setTheme] =
-    useState("light");
-
-
-  const [
-    selectedGenres,
-    setSelectedGenres,
-  ] = useState([
-    "Literary Fiction",
-    "Contemporary",
-    "Fantasy",
-  ]);
-
-
-  // ===================================================
-  // ONBOARDING HANDLERS
-  // ===================================================
-
-  const handleLoginComplete =
-    (user) => {
-      setOnboardingStep(
-        "genres"
-      );
-    };
-
+    setOnboardingStep("genres");
+  };
 
   const handleLogout = () => {
     localStorage.removeItem(
@@ -673,216 +459,184 @@ export default function App() {
       "booknestToken"
     );
 
-    setUserLibrary([]);
-
-    setSettings(false);
-
-    setOnboardingStep(
-      "login"
+    localStorage.removeItem(
+      "booknestGenres"
     );
+
+    localStorage.removeItem(
+      "booknestRatings"
+    );
+
+    setUserLibrary([]);
+    setSettings(false);
+    setModal(null);
+    setSection("home");
+    setQuery("");
+    setOnboardingGenres([]);
+    setOnboardingRatings({});
+    setOnboardingStep("login");
   };
 
+  const handleGenresComplete = (
+    genres
+  ) => {
+    setOnboardingGenres(genres);
 
-  const handleGenresComplete =
-    (genres) => {
-      setOnboardingGenres(
-        genres
-      );
+    localStorage.setItem(
+      "booknestGenres",
+      JSON.stringify(genres)
+    );
 
-      localStorage.setItem(
-        "booknestGenres",
-        JSON.stringify(genres)
-      );
+    setOnboardingStep("ratings");
+  };
 
-      setOnboardingStep(
-        "ratings"
-      );
-    };
+  const handleRatingsComplete = (
+    ratings
+  ) => {
+    setOnboardingRatings(ratings);
 
+    localStorage.setItem(
+      "booknestRatings",
+      JSON.stringify(ratings)
+    );
 
-  const handleRatingsComplete =
-    (ratings) => {
-      setOnboardingRatings(
-        ratings
-      );
-
-      localStorage.setItem(
-        "booknestRatings",
-        JSON.stringify(ratings)
-      );
-
-      setOnboardingStep(
-        "recommendations"
-      );
-    };
-
+    setOnboardingStep(
+      "recommendations"
+    );
+  };
 
   const finishOnboarding = () => {
-    setOnboardingStep(
-      "complete"
-    );
+    setOnboardingStep("complete");
   };
-
-
-  // ===================================================
-  // LIBRARY CHANGE HANDLER
-  // ===================================================
 
   const handleLibraryChange = (
     updatedEntry,
-    removedBookId
+    removedBookId,
+    keepModalOpen = false
   ) => {
-
-    /*
-      BOOK REMOVED
-    */
-
     if (removedBookId) {
+      setUserLibrary((current) => {
+        return current.filter(
+          (entry) => {
+            const entryBookId =
+              entry?.book?._id ||
+              entry?.book?.id;
 
-      setUserLibrary(
-        (current) =>
-          current.filter(
-            (entry) =>
-              entry.book?._id !==
-              removedBookId
-          )
-      );
+            return (
+              String(entryBookId) !==
+              String(removedBookId)
+            );
+          }
+        );
+      });
 
       setModal(null);
 
       return;
     }
 
+    if (!updatedEntry) {
+      return;
+    }
 
-    /*
-      BOOK ADDED OR UPDATED
-    */
+    const updatedBookId =
+      updatedEntry?.book?._id ||
+      updatedEntry?.book?.id;
 
-    if (updatedEntry) {
+    setUserLibrary((current) => {
+      const existingIndex =
+        current.findIndex(
+          (entry) => {
+            const entryBookId =
+              entry?.book?._id ||
+              entry?.book?.id;
 
-      setUserLibrary(
-        (current) => {
-
-          const existingIndex =
-            current.findIndex(
-              (entry) =>
-                entry._id ===
-                updatedEntry._id
+            return (
+              String(entryBookId) ===
+              String(updatedBookId)
             );
-
-
-          /*
-            Existing entry:
-            replace it.
-          */
-
-          if (
-            existingIndex !== -1
-          ) {
-            const updated =
-              [...current];
-
-            updated[
-              existingIndex
-            ] = updatedEntry;
-
-            return updated;
           }
+        );
 
-
-          /*
-            New entry:
-            add it.
-          */
-
-          return [
-            ...current,
-            updatedEntry,
-          ];
-        }
-      );
-
-
-      /*
-        Update the currently open
-        modal immediately so its
-        buttons reflect the new status.
-      */
-
-      if (modal) {
-
-        const updatedBook =
-          library.find(
-            (book) =>
-              book.id ===
-              (
-                updatedEntry.book?._id ||
-                updatedEntry.book?.id
-              )
-          );
-
-
-        if (updatedBook) {
-
-          setModal({
-            ...updatedBook,
-
-            status:
-              updatedEntry.status,
-
-            libraryEntryId:
-              updatedEntry._id,
-
-            currentPage:
-              updatedEntry.currentPage ||
-              0,
-
-            userRating:
-              updatedEntry.rating ||
-              0,
-          });
-        }
+      if (existingIndex === -1) {
+        return [
+          ...current,
+          updatedEntry,
+        ];
       }
+
+      const updated = [
+        ...current,
+      ];
+
+      updated[existingIndex] =
+        updatedEntry;
+
+      return updated;
+    });
+
+    if (
+      updatedEntry.status ===
+      "currently"
+    ) {
+      setUserLibrary((current) => {
+        return current.map(
+          (entry) => {
+            const entryBookId =
+              entry?.book?._id ||
+              entry?.book?.id;
+
+            if (
+              String(entryBookId) ===
+              String(updatedBookId)
+            ) {
+              return entry;
+            }
+
+            if (
+              entry.status ===
+              "currently"
+            ) {
+              return {
+                ...entry,
+                status: "read",
+              };
+            }
+
+            return entry;
+          }
+        );
+      });
+    }
+
+    if (!keepModalOpen) {
+      setModal(null);
     }
   };
 
-
-  // ===================================================
-  // COUNTS
-  // ===================================================
-
   const totalBooks =
-    library.filter(
-      (book) =>
-        book.status !==
-        "currently"
-    ).length;
+    userLibrary.length;
 
+  const tbrCount =
+    userLibrary.filter(
+      (entry) =>
+        entry.status === "tbr"
+    ).length;
 
   const finishedBooks =
-    library.filter(
-      (book) =>
-        book.status === "read"
+    userLibrary.filter(
+      (entry) =>
+        entry.status === "read"
     ).length;
-
-
-  // ===================================================
-  // NAVIGATION
-  // ===================================================
 
   const handleSection = (s) => {
     setSection(s);
     setSettings(false);
+    setQuery("");
   };
 
-
-  // ===================================================
-  // ONBOARDING SCREENS
-  // ===================================================
-
   if (
-    onboardingStep ===
-    "login"
+    onboardingStep === "login"
   ) {
     return (
       <LoginPage
@@ -893,10 +647,8 @@ export default function App() {
     );
   }
 
-
   if (
-    onboardingStep ===
-    "genres"
+    onboardingStep === "genres"
   ) {
     return (
       <GenreSelection
@@ -907,10 +659,8 @@ export default function App() {
     );
   }
 
-
   if (
-    onboardingStep ===
-    "ratings"
+    onboardingStep === "ratings"
   ) {
     return (
       <BookRatingPage
@@ -920,7 +670,6 @@ export default function App() {
       />
     );
   }
-
 
   if (
     onboardingStep ===
@@ -941,16 +690,13 @@ export default function App() {
     );
   }
 
-
-  // ===================================================
-  // MAIN APP
-  // ===================================================
+  const isSearching =
+    query.trim().length > 0;
 
   return (
     <div
       className={`app ${theme}`}
     >
-
       <Topbar
         query={query}
         setQuery={setQuery}
@@ -967,45 +713,34 @@ export default function App() {
         }
       />
 
-
       <main>
-
-        {/* PROFILE */}
-
-        {section ===
-        "profile" ? (
-
+        {section === "profile" ? (
           <ProfilePanel />
-
-        ) : section ===
-          "read" ? (
-
+        ) : section === "read" ? (
           <Shelf
             title="Books I've read"
             subtitle="Your finished shelf"
             items={read}
             onOpen={setModal}
           />
-
-        ) : section ===
-          "tbr" ? (
-
+        ) : section === "tbr" ? (
           <Shelf
             title="My TBR"
             subtitle="Waiting patiently"
             items={tbr}
             onOpen={setModal}
           />
-
+        ) : isSearching ? (
+          <Shelf
+            title="Search results"
+            subtitle={`Books matching “${query.trim()}”`}
+            items={filtered}
+            onOpen={setModal}
+          />
         ) : (
-
           <>
-            {/* HERO */}
-
             <div className="hero">
-
               <div className="hero-copy">
-
                 <p className="eyebrow">
                   Your reading space
                 </p>
@@ -1013,7 +748,6 @@ export default function App() {
                 <h1>
                   A shelf for every story
                   <br />
-
                   <em>
                     you haven't met yet.
                   </em>
@@ -1022,13 +756,11 @@ export default function App() {
                 <p>
                   Keep your TBR close,
                   remember what you've
-                  loved, and find your next
-                  favourite book.
+                  loved, and find your
+                  next favourite book.
                 </p>
 
-
                 <div className="hero-stats">
-
                   <div>
                     <strong>
                       {totalBooks}
@@ -1039,17 +771,15 @@ export default function App() {
                     </span>
                   </div>
 
-
                   <div>
                     <strong>
-                      {tbr.length}
+                      {tbrCount}
                     </strong>
 
                     <span>
                       waiting to be read
                     </span>
                   </div>
-
 
                   <div>
                     <strong>
@@ -1060,22 +790,15 @@ export default function App() {
                       stories finished
                     </span>
                   </div>
-
                 </div>
-
               </div>
-
 
               <CurrentlyReading
                 reading={
                   currentlyReading
                 }
               />
-
             </div>
-
-
-            {/* TBR */}
 
             <Shelf
               title="To be read"
@@ -1084,9 +807,6 @@ export default function App() {
               onOpen={setModal}
             />
 
-
-            {/* READ */}
-
             <Shelf
               title="Already read"
               subtitle="Stories that stayed"
@@ -1094,14 +814,9 @@ export default function App() {
               onOpen={setModal}
               reverse
             />
-
           </>
         )}
-
       </main>
-
-
-      {/* BOOK MODAL */}
 
       {modal && (
         <BookModal
@@ -1114,9 +829,6 @@ export default function App() {
           }
         />
       )}
-
-
-      {/* SETTINGS */}
 
       {settings && (
         <>
@@ -1145,7 +857,6 @@ export default function App() {
           />
         </>
       )}
-
     </div>
   );
 }
