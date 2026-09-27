@@ -1,23 +1,33 @@
-import ProfilePanel from './components/ProfilePanel';
-import { api } from './services/api';
-import React, { useEffect, useMemo, useState } from 'react';
-import { books } from './data/books';
-import Topbar from './components/Topbar';
-import BookCard from './components/BookCard';
-import BookModal from './components/BookModal';
-import SettingsPanel from './components/SettingsPanel';
+import ProfilePanel from "./components/ProfilePanel";
+import { api } from "./services/api";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { books } from "./data/books";
+import Topbar from "./components/Topbar";
+import BookCard from "./components/BookCard";
+import BookModal from "./components/BookModal";
+import SettingsPanel from "./components/SettingsPanel";
 
-import LoginPage from './components/LoginPage';
-import GenreSelection from './components/GenreSelection';
-import BookRatingPage from './components/BookRatingPage';
-import RecommendationsPage from './components/RecommendationsPage';
+import LoginPage from "./components/LoginPage";
+import GenreSelection from "./components/GenreSelection";
+import BookRatingPage from "./components/BookRatingPage";
+import RecommendationsPage from "./components/RecommendationsPage";
 
-function Shelf({ title, subtitle, items, onOpen, reverse = false }) {
-  /*
-    Two identical copies create the seamless infinite loop.
-    When the first copy moves completely out of view,
-    the second copy is already in exactly the same position.
-  */
+
+// =====================================================
+// SHELF
+// =====================================================
+
+function Shelf({
+  title,
+  subtitle,
+  items,
+  onOpen,
+  reverse = false,
+}) {
   const carouselItems = [...items, ...items];
 
   return (
@@ -28,13 +38,15 @@ function Shelf({ title, subtitle, items, onOpen, reverse = false }) {
           <h2>{title}</h2>
         </div>
 
-        <span className="count">{items.length} books</span>
+        <span className="count">
+          {items.length} books
+        </span>
       </div>
 
       <div className="shelf-viewport">
         <div
           className={`shelf-row ${
-            reverse ? 'carousel-reverse' : ''
+            reverse ? "carousel-reverse" : ""
           }`}
         >
           {carouselItems.map((book, index) => (
@@ -50,6 +62,11 @@ function Shelf({ title, subtitle, items, onOpen, reverse = false }) {
   );
 }
 
+
+// =====================================================
+// CURRENTLY READING
+// =====================================================
+
 function CurrentlyReading({ reading }) {
   if (!reading) return null;
 
@@ -61,7 +78,9 @@ function CurrentlyReading({ reading }) {
     100,
     Math.max(
       1,
-      Math.round((page / totalPages) * 100)
+      Math.round(
+        (page / totalPages) * 100
+      )
     )
   );
 
@@ -89,22 +108,32 @@ function CurrentlyReading({ reading }) {
           <div className="reading-progress">
             <div
               className="reading-progress-fill"
-              style={{ width: `${progress}%` }}
+              style={{
+                width: `${progress}%`,
+              }}
             />
           </div>
 
           <div className="reading-progress-meta">
-            <span>{progress}% through</span>
+            <span>
+              {progress}% through
+            </span>
 
             <span>
-              {totalPages - page} pages left
+              {Math.max(
+                0,
+                totalPages - page
+              )}{" "}
+              pages left
             </span>
           </div>
         </div>
 
         <div className="reading-info">
           <p className="reading-quote">
-            “{book.quote}”
+            {book.quote
+              ? `“${book.quote}”`
+              : "A story currently waiting to be finished."}
           </p>
 
           <div className="reading-book">
@@ -114,7 +143,10 @@ function CurrentlyReading({ reading }) {
 
           <div className="reading-status">
             <span className="status-dot"></span>
-            <span>left off at page {page}</span>
+
+            <span>
+              left off at page {page}
+            </span>
           </div>
         </div>
       </div>
@@ -122,284 +154,832 @@ function CurrentlyReading({ reading }) {
   );
 }
 
+
+// =====================================================
+// APP
+// =====================================================
+
 export default function App() {
 
-  /*
-    =========================================
-    FETCH BOOKS FROM MONGODB
-    =========================================
-  */
+  // ===================================================
+  // BOOK CATALOGUE
+  // ===================================================
+
+  const [mongoBooks, setMongoBooks] =
+    useState([]);
+
+  const [booksLoading, setBooksLoading] =
+    useState(true);
 
   useEffect(() => {
-    api.getBooks()
-      .then((data) => {
-        console.log('BOOKS FROM MONGODB:', data);
+    const fetchBooks = async () => {
+      try {
+        const data =
+          await api.getBooks();
+
+        console.log(
+          "BOOKS FROM MONGODB:",
+          data
+        );
+
         setMongoBooks(data);
-      })
-      .catch((error) => {
-        console.error('FAILED TO FETCH BOOKS:', error);
-      });
+
+      } catch (error) {
+        console.error(
+          "FAILED TO FETCH BOOKS:",
+          error
+        );
+
+      } finally {
+        setBooksLoading(false);
+      }
+    };
+
+    fetchBooks();
   }, []);
 
-  const [query, setQuery] = useState('');
-  const [mongoBooks, setMongoBooks] = useState([]);
 
-  /*
-    =========================================
-    CONVERT MONGODB BOOK FORMAT
-    TO BOOKNEST FRONTEND FORMAT
-    =========================================
-  */
+  // ===================================================
+  // USER LIBRARY
+  // ===================================================
 
-  const formattedMongoBooks = mongoBooks.map((book) => ({
-    id: book._id,
-    title: book.title,
-    author: book.author,
-    cover: book.coverImage,
-    description: book.description,
-    genre: book.genres?.[0] || '',
-    publishedYear: book.publishedYear,
-    rating: book.averageRating,
-    status: 'read',
-  }));
+  const [userLibrary, setUserLibrary] =
+    useState([]);
 
-  console.log(
-    'FORMATTED MONGODB BOOKS:',
-    formattedMongoBooks
-  );
+  const [libraryLoading, setLibraryLoading] =
+    useState(true);
 
-  const [section, setSection] = useState('home');
-  const [modal, setModal] = useState(null);
-  const [settings, setSettings] = useState(false);
-  const [theme, setTheme] = useState('light');
 
-  const [selectedGenres, setSelectedGenres] = useState([
-    'Literary Fiction',
-    'Contemporary',
-    'Fantasy'
-  ]);
+  // ===================================================
+  // ONBOARDING STORAGE
+  // ===================================================
 
-  /*
-    =========================================
-    BOOKNEST ONBOARDING
-    =========================================
-  */
+  const existingUser =
+    localStorage.getItem(
+      "booknestUser"
+    );
 
-  const existingUser = localStorage.getItem(
-    'booknestUser'
-  );
+  const savedGenres =
+    localStorage.getItem(
+      "booknestGenres"
+    );
 
-  const savedGenres = localStorage.getItem(
-    'booknestGenres'
-  );
+  const savedRatings =
+    localStorage.getItem(
+      "booknestRatings"
+    );
 
-  const savedRatings = localStorage.getItem(
-    'booknestRatings'
-  );
 
-  const [onboardingStep, setOnboardingStep] = useState(() => {
-    if (!existingUser) {
-      return 'login';
-    }
+  const [onboardingStep, setOnboardingStep] =
+    useState(() => {
+      if (!existingUser) {
+        return "login";
+      }
 
-    if (!savedGenres) {
-      return 'genres';
-    }
+      if (!savedGenres) {
+        return "genres";
+      }
 
-    if (!savedRatings) {
-      return 'ratings';
-    }
+      if (!savedRatings) {
+        return "ratings";
+      }
 
-    return 'complete';
-  });
+      return "complete";
+    });
+
 
   const [onboardingGenres, setOnboardingGenres] =
     useState(() => {
       if (!savedGenres) return [];
 
       try {
-        return JSON.parse(savedGenres);
+        return JSON.parse(
+          savedGenres
+        );
       } catch {
         return [];
       }
     });
+
 
   const [onboardingRatings, setOnboardingRatings] =
     useState(() => {
       if (!savedRatings) return {};
 
       try {
-        return JSON.parse(savedRatings);
+        return JSON.parse(
+          savedRatings
+        );
       } catch {
         return {};
       }
     });
 
-  const handleLoginComplete = (user) => {
-    setOnboardingStep('genres');
-  };
 
-  const handleLogout = () => {
-    localStorage.removeItem('booknestUser');
-    localStorage.removeItem('booknestToken');
+  // ===================================================
+  // FETCH USER LIBRARY
+  // ===================================================
 
-    setSettings(false);
-    setOnboardingStep('login');
-  };
+  useEffect(() => {
+    const token =
+      localStorage.getItem(
+        "booknestToken"
+      );
 
-  const handleGenresComplete = (genres) => {
-    setOnboardingGenres(genres);
-    setOnboardingStep('ratings');
-  };
+    // No token = no authenticated library
+    if (!token) {
+      setLibraryLoading(false);
+      return;
+    }
 
-  const handleRatingsComplete = (ratings) => {
-    setOnboardingRatings(ratings);
-    setOnboardingStep('recommendations');
-  };
+    const fetchLibrary = async () => {
+      try {
+        const data =
+          await api.getLibrary();
 
-  const finishOnboarding = () => {
-    setOnboardingStep('complete');
-  };
+        console.log(
+          "USER LIBRARY:",
+          data
+        );
 
-  /*
-    =========================================
-    CURRENTLY READING
-    =========================================
-  */
+        setUserLibrary(data);
 
-  const [currentlyReading] = useState(() => {
-    const pool = books.filter(
-      (book) => book.status === 'currently'
+      } catch (error) {
+        console.error(
+          "FAILED TO FETCH USER LIBRARY:",
+          error
+        );
+
+      } finally {
+        setLibraryLoading(false);
+      }
+    };
+
+    /*
+      We fetch once the user reaches the
+      actual application.
+
+      This ensures the token has already
+      been created by LoginPage.
+    */
+    if (onboardingStep === "complete") {
+      fetchLibrary();
+    }
+
+  }, [onboardingStep]);
+
+
+  // ===================================================
+  // BUILD BOOK LIBRARY
+  // ===================================================
+
+  const library = useMemo(() => {
+
+    /*
+      MongoDB is now the main catalogue.
+
+      If it isn't available yet, use the
+      original frontend library as a fallback.
+    */
+
+    const sourceBooks =
+      mongoBooks.length
+        ? mongoBooks
+        : books;
+
+
+    /*
+      Create a quick lookup of the user's
+      LibraryEntries.
+
+      book._id → LibraryEntry
+    */
+
+    const libraryMap =
+      new Map();
+
+    userLibrary.forEach(
+      (entry) => {
+        if (entry.book?._id) {
+          libraryMap.set(
+            entry.book._id,
+            entry
+          );
+        }
+      }
     );
 
-    if (!pool.length) return null;
 
-    const book =
-      pool[Math.floor(Math.random() * pool.length)];
+    return sourceBooks.map(
+      (remoteBook) => {
 
-    const totalPages = book.pages || 300;
+        const matchingLocalBook =
+          books.find(
+            (localBook) =>
+              localBook.title ===
+                remoteBook.title &&
+              localBook.author ===
+                remoteBook.author
+          );
 
-    const page =
-      Math.floor(
-        Math.random() * (totalPages - 40)
-      ) + 30;
 
-    return {
-      book,
-      page
-    };
-  });
+        const entry =
+          libraryMap.get(
+            remoteBook.id ||
+              remoteBook._id
+          );
 
-  /*
-    =========================================
-    SEARCH
-    =========================================
-  */
+
+        /*
+          LibraryEntry status is the
+          persistent user status.
+
+          Until a user has library entries,
+          we retain the old local status as
+          a temporary fallback so your existing
+          demo shelves don't suddenly disappear.
+        */
+
+        const status =
+          entry?.status ??
+          matchingLocalBook?.status ??
+          null;
+
+
+        return {
+          ...matchingLocalBook,
+          ...remoteBook,
+
+          id:
+            remoteBook.id ||
+            remoteBook._id ||
+            matchingLocalBook?.id,
+
+          cover:
+            remoteBook.cover ||
+            remoteBook.coverImage ||
+            matchingLocalBook?.cover ||
+            "",
+
+          blurb:
+            remoteBook.blurb ||
+            remoteBook.description ||
+            matchingLocalBook?.blurb ||
+            "",
+
+          description:
+            remoteBook.description ||
+            matchingLocalBook?.description ||
+            "",
+
+          genre:
+            remoteBook.genre ||
+            remoteBook.genres ||
+            matchingLocalBook?.genre ||
+            [],
+
+          genres:
+            remoteBook.genres ||
+            matchingLocalBook?.genres ||
+            [],
+
+          year:
+            remoteBook.year ||
+            remoteBook.publishedYear ||
+            matchingLocalBook?.year,
+
+          publishedYear:
+            remoteBook.publishedYear ||
+            matchingLocalBook?.publishedYear,
+
+          pages:
+            remoteBook.pages ||
+            matchingLocalBook?.pages ||
+            0,
+
+          quote:
+            remoteBook.quote ||
+            matchingLocalBook?.quote ||
+            "",
+
+          rating:
+            remoteBook.rating ||
+            remoteBook.averageRating ||
+            matchingLocalBook?.rating ||
+            0,
+
+          /*
+            USER-SPECIFIC DATA
+          */
+
+          status,
+
+          libraryEntryId:
+            entry?._id || null,
+
+          currentPage:
+            entry?.currentPage || 0,
+
+          userRating:
+            entry?.rating || 0,
+        };
+      }
+    );
+
+  }, [
+    mongoBooks,
+    userLibrary,
+  ]);
+
+
+  // ===================================================
+  // SEARCH
+  // ===================================================
+
+  const [query, setQuery] =
+    useState("");
+
 
   const filtered = useMemo(
     () =>
-      books.filter((b) =>
-        `${b.title} ${b.author} ${b.genre}`
-          .toLowerCase()
-          .includes(query.toLowerCase())
+      library.filter(
+        (book) =>
+          `${book.title} ${
+            book.author
+          } ${
+            Array.isArray(book.genre)
+              ? book.genre.join(" ")
+              : book.genre || ""
+          }`
+            .toLowerCase()
+            .includes(
+              query.toLowerCase()
+            )
       ),
-    [query]
+    [library, query]
   );
 
-  const tbr = filtered.filter(
-    (b) => b.status === 'tbr'
-  );
 
-  /*
-    Existing frontend "read" books
-    + MongoDB "read" books
-  */
+  // ===================================================
+  // PERSONAL SHELVES
+  // ===================================================
 
-  const read = [
-    ...filtered.filter(
-      (b) => b.status === 'read'
-    ),
-    ...formattedMongoBooks.filter(
-      (b) => b.status === 'read'
-    )
-  ];
+  const tbr =
+    filtered.filter(
+      (book) =>
+        book.status === "tbr"
+    );
 
-  const totalBooks = books.filter(
-    (book) => book.status !== 'currently'
-  ).length;
+
+  const read =
+    filtered.filter(
+      (book) =>
+        book.status === "read"
+    );
+
+
+  const currentlyReadingBooks =
+    library.filter(
+      (book) =>
+        book.status === "currently"
+    );
+
+
+  // ===================================================
+  // CURRENTLY READING BOOK
+  // ===================================================
+
+  const [randomReadingBook] =
+    useState(() => null);
+
+
+  const currentlyReading =
+    useMemo(() => {
+
+      if (
+        currentlyReadingBooks.length
+      ) {
+        const book =
+          currentlyReadingBooks[0];
+
+        return {
+          book,
+          page:
+            book.currentPage || 1,
+        };
+      }
+
+
+      /*
+        Temporary fallback to the old
+        frontend data if the user hasn't
+        created a MongoDB Currently Reading
+        entry yet.
+      */
+
+      const localPool =
+        books.filter(
+          (book) =>
+            book.status ===
+            "currently"
+        );
+
+
+      if (!localPool.length) {
+        return null;
+      }
+
+
+      const book =
+        randomReadingBook ||
+        localPool[
+          Math.floor(
+            Math.random() *
+              localPool.length
+          )
+        ];
+
+
+      const totalPages =
+        book.pages || 300;
+
+
+      const page =
+        Math.floor(
+          Math.random() *
+            Math.max(
+              1,
+              totalPages - 40
+            )
+        ) + 30;
+
+
+      return {
+        book,
+        page,
+      };
+
+    }, [
+      currentlyReadingBooks,
+      randomReadingBook,
+    ]);
+
+
+  // ===================================================
+  // UI STATE
+  // ===================================================
+
+  const [section, setSection] =
+    useState("home");
+
+  const [modal, setModal] =
+    useState(null);
+
+  const [settings, setSettings] =
+    useState(false);
+
+  const [theme, setTheme] =
+    useState("light");
+
+
+  const [
+    selectedGenres,
+    setSelectedGenres,
+  ] = useState([
+    "Literary Fiction",
+    "Contemporary",
+    "Fantasy",
+  ]);
+
+
+  // ===================================================
+  // ONBOARDING HANDLERS
+  // ===================================================
+
+  const handleLoginComplete =
+    (user) => {
+      setOnboardingStep(
+        "genres"
+      );
+    };
+
+
+  const handleLogout = () => {
+    localStorage.removeItem(
+      "booknestUser"
+    );
+
+    localStorage.removeItem(
+      "booknestToken"
+    );
+
+    setUserLibrary([]);
+
+    setSettings(false);
+
+    setOnboardingStep(
+      "login"
+    );
+  };
+
+
+  const handleGenresComplete =
+    (genres) => {
+      setOnboardingGenres(
+        genres
+      );
+
+      localStorage.setItem(
+        "booknestGenres",
+        JSON.stringify(genres)
+      );
+
+      setOnboardingStep(
+        "ratings"
+      );
+    };
+
+
+  const handleRatingsComplete =
+    (ratings) => {
+      setOnboardingRatings(
+        ratings
+      );
+
+      localStorage.setItem(
+        "booknestRatings",
+        JSON.stringify(ratings)
+      );
+
+      setOnboardingStep(
+        "recommendations"
+      );
+    };
+
+
+  const finishOnboarding = () => {
+    setOnboardingStep(
+      "complete"
+    );
+  };
+
+
+  // ===================================================
+  // LIBRARY CHANGE HANDLER
+  // ===================================================
+
+  const handleLibraryChange = (
+    updatedEntry,
+    removedBookId
+  ) => {
+
+    /*
+      BOOK REMOVED
+    */
+
+    if (removedBookId) {
+
+      setUserLibrary(
+        (current) =>
+          current.filter(
+            (entry) =>
+              entry.book?._id !==
+              removedBookId
+          )
+      );
+
+      setModal(null);
+
+      return;
+    }
+
+
+    /*
+      BOOK ADDED OR UPDATED
+    */
+
+    if (updatedEntry) {
+
+      setUserLibrary(
+        (current) => {
+
+          const existingIndex =
+            current.findIndex(
+              (entry) =>
+                entry._id ===
+                updatedEntry._id
+            );
+
+
+          /*
+            Existing entry:
+            replace it.
+          */
+
+          if (
+            existingIndex !== -1
+          ) {
+            const updated =
+              [...current];
+
+            updated[
+              existingIndex
+            ] = updatedEntry;
+
+            return updated;
+          }
+
+
+          /*
+            New entry:
+            add it.
+          */
+
+          return [
+            ...current,
+            updatedEntry,
+          ];
+        }
+      );
+
+
+      /*
+        Update the currently open
+        modal immediately so its
+        buttons reflect the new status.
+      */
+
+      if (modal) {
+
+        const updatedBook =
+          library.find(
+            (book) =>
+              book.id ===
+              (
+                updatedEntry.book?._id ||
+                updatedEntry.book?.id
+              )
+          );
+
+
+        if (updatedBook) {
+
+          setModal({
+            ...updatedBook,
+
+            status:
+              updatedEntry.status,
+
+            libraryEntryId:
+              updatedEntry._id,
+
+            currentPage:
+              updatedEntry.currentPage ||
+              0,
+
+            userRating:
+              updatedEntry.rating ||
+              0,
+          });
+        }
+      }
+    }
+  };
+
+
+  // ===================================================
+  // COUNTS
+  // ===================================================
+
+  const totalBooks =
+    library.filter(
+      (book) =>
+        book.status !==
+        "currently"
+    ).length;
+
+
+  const finishedBooks =
+    library.filter(
+      (book) =>
+        book.status === "read"
+    ).length;
+
+
+  // ===================================================
+  // NAVIGATION
+  // ===================================================
 
   const handleSection = (s) => {
     setSection(s);
     setSettings(false);
   };
 
-  /*
-    =========================================
-    LOGIN / ONBOARDING SCREENS
-    =========================================
-  */
 
-  if (onboardingStep === 'login') {
+  // ===================================================
+  // ONBOARDING SCREENS
+  // ===================================================
+
+  if (
+    onboardingStep ===
+    "login"
+  ) {
     return (
       <LoginPage
-        onComplete={handleLoginComplete}
+        onComplete={
+          handleLoginComplete
+        }
       />
     );
   }
 
-  if (onboardingStep === 'genres') {
+
+  if (
+    onboardingStep ===
+    "genres"
+  ) {
     return (
       <GenreSelection
-        onComplete={handleGenresComplete}
+        onComplete={
+          handleGenresComplete
+        }
       />
     );
   }
 
-  if (onboardingStep === 'ratings') {
+
+  if (
+    onboardingStep ===
+    "ratings"
+  ) {
     return (
       <BookRatingPage
-        onComplete={handleRatingsComplete}
+        onComplete={
+          handleRatingsComplete
+        }
       />
     );
   }
 
-  if (onboardingStep === 'recommendations') {
+
+  if (
+    onboardingStep ===
+    "recommendations"
+  ) {
     return (
       <RecommendationsPage
-        genres={onboardingGenres}
-        ratings={onboardingRatings}
-        onFinish={finishOnboarding}
+        genres={
+          onboardingGenres
+        }
+        ratings={
+          onboardingRatings
+        }
+        onFinish={
+          finishOnboarding
+        }
       />
     );
   }
 
-  /*
-    =========================================
-    EXISTING BOOKNEST APP
-    =========================================
-  */
+
+  // ===================================================
+  // MAIN APP
+  // ===================================================
 
   return (
-    <div className={`app ${theme}`}>
+    <div
+      className={`app ${theme}`}
+    >
 
       <Topbar
         query={query}
         setQuery={setQuery}
-        onSection={handleSection}
+        onSection={
+          handleSection
+        }
         section={section}
         onRecommended={() => {
-          setQuery('');
-          setSection('home');
+          setQuery("");
+          setSection("home");
         }}
-        onSettings={() => setSettings(true)}
+        onSettings={() =>
+          setSettings(true)
+        }
       />
+
 
       <main>
 
-        {section === 'profile' ? (
+        {/* PROFILE */}
+
+        {section ===
+        "profile" ? (
+
           <ProfilePanel />
 
-        ) : section === 'read' ? (
+        ) : section ===
+          "read" ? (
+
           <Shelf
             title="Books I've read"
             subtitle="Your finished shelf"
@@ -407,7 +987,9 @@ export default function App() {
             onOpen={setModal}
           />
 
-        ) : section === 'tbr' ? (
+        ) : section ===
+          "tbr" ? (
+
           <Shelf
             title="My TBR"
             subtitle="Waiting patiently"
@@ -416,7 +998,10 @@ export default function App() {
           />
 
         ) : (
+
           <>
+            {/* HERO */}
+
             <div className="hero">
 
               <div className="hero-copy">
@@ -428,41 +1013,47 @@ export default function App() {
                 <h1>
                   A shelf for every story
                   <br />
+
                   <em>
                     you haven't met yet.
                   </em>
                 </h1>
 
                 <p>
-                  Keep your TBR close, remember what
-                  you've loved, and find your next
+                  Keep your TBR close,
+                  remember what you've
+                  loved, and find your next
                   favourite book.
                 </p>
+
 
                 <div className="hero-stats">
 
                   <div>
-                    <strong>{totalBooks}</strong>
+                    <strong>
+                      {totalBooks}
+                    </strong>
+
                     <span>
                       books in your library
                     </span>
                   </div>
 
+
                   <div>
-                    <strong>{tbr.length}</strong>
+                    <strong>
+                      {tbr.length}
+                    </strong>
+
                     <span>
                       waiting to be read
                     </span>
                   </div>
 
+
                   <div>
                     <strong>
-                      {
-                        books.filter(
-                          (b) =>
-                            b.status === 'read'
-                        ).length
-                      }
+                      {finishedBooks}
                     </strong>
 
                     <span>
@@ -474,11 +1065,17 @@ export default function App() {
 
               </div>
 
+
               <CurrentlyReading
-                reading={currentlyReading}
+                reading={
+                  currentlyReading
+                }
               />
 
             </div>
+
+
+            {/* TBR */}
 
             <Shelf
               title="To be read"
@@ -487,6 +1084,9 @@ export default function App() {
               onOpen={setModal}
             />
 
+
+            {/* READ */}
+
             <Shelf
               title="Already read"
               subtitle="Stories that stayed"
@@ -494,32 +1094,54 @@ export default function App() {
               onOpen={setModal}
               reverse
             />
+
           </>
         )}
 
       </main>
 
+
+      {/* BOOK MODAL */}
+
       {modal && (
         <BookModal
           book={modal}
-          onClose={() => setModal(null)}
+          onClose={() =>
+            setModal(null)
+          }
+          onLibraryChange={
+            handleLibraryChange
+          }
         />
       )}
+
+
+      {/* SETTINGS */}
 
       {settings && (
         <>
           <div
             className="panel-overlay"
-            onClick={() => setSettings(false)}
+            onClick={() =>
+              setSettings(false)
+            }
           />
 
           <SettingsPanel
             theme={theme}
             setTheme={setTheme}
-            selectedGenres={selectedGenres}
-            setSelectedGenres={setSelectedGenres}
-            onClose={() => setSettings(false)}
-            onLogout={handleLogout}
+            selectedGenres={
+              selectedGenres
+            }
+            setSelectedGenres={
+              setSelectedGenres
+            }
+            onClose={() =>
+              setSettings(false)
+            }
+            onLogout={
+              handleLogout
+            }
           />
         </>
       )}

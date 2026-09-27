@@ -1,19 +1,24 @@
-import React, { useState } from 'react';
-import './Onboarding.css';
+import React, { useState } from "react";
+import "./Onboarding.css";
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = "http://localhost:5000/api";
 
 export default function LoginPage({ onComplete }) {
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [isRegistering, setIsRegistering] =
+    useState(false);
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password || (isRegistering && !name)) {
+    if (
+      !email ||
+      !password ||
+      (isRegistering && !name)
+    ) {
       return;
     }
 
@@ -34,33 +39,54 @@ export default function LoginPage({ onComplete }) {
           };
 
       const response = await fetch(endpoint, {
-        method: 'POST',
+        method: "POST",
+
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
+
         body: JSON.stringify(body),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || 'Something went wrong.');
+        alert(
+          data.message ||
+            "Something went wrong."
+        );
         return;
       }
 
+      // Save user information
       const user = data.user;
 
-      localStorage.setItem('booknestUser', JSON.stringify(user));
+      localStorage.setItem(
+        "booknestUser",
+        JSON.stringify(user)
+      );
 
+      // Save authentication token
+      // This works for both login and registration
       if (data.token) {
-        localStorage.setItem('booknestToken', data.token);
+        localStorage.setItem(
+          "booknestToken",
+          data.token
+        );
       }
 
+      // Continue to the next onboarding step
       onComplete(user);
 
     } catch (error) {
-      console.error('Authentication error:', error);
-      alert('Unable to connect to BookNest server.');
+      console.error(
+        "Authentication error:",
+        error
+      );
+
+      alert(
+        "Unable to connect to BookNest server."
+      );
     }
   };
 
@@ -68,12 +94,19 @@ export default function LoginPage({ onComplete }) {
     <div className="onboarding-page">
       <div className="onboarding-paper">
 
+        {/* BRAND */}
+
         <div className="onboarding-brand">
-          <span className="brand-mark">B</span>
+          <span className="brand-mark">
+            B
+          </span>
+
           <span>BookNest</span>
         </div>
 
         <div className="onboarding-content">
+
+          {/* INTRO */}
 
           <p className="onboarding-eyebrow">
             YOUR READING SPACE
@@ -91,10 +124,14 @@ export default function LoginPage({ onComplete }) {
             reading life that feels like yours.
           </p>
 
+          {/* FORM */}
+
           <form
             className="login-form"
             onSubmit={handleSubmit}
           >
+
+            {/* NAME — REGISTER ONLY */}
 
             {isRegistering && (
               <label>
@@ -104,10 +141,14 @@ export default function LoginPage({ onComplete }) {
                   type="text"
                   placeholder="What should we call you?"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) =>
+                    setName(e.target.value)
+                  }
                 />
               </label>
             )}
+
+            {/* EMAIL */}
 
             <label>
               <span>Email</span>
@@ -116,9 +157,13 @@ export default function LoginPage({ onComplete }) {
                 type="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
               />
             </label>
+
+            {/* PASSWORD */}
 
             <label>
               <span>Password</span>
@@ -127,32 +172,44 @@ export default function LoginPage({ onComplete }) {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
               />
             </label>
+
+            {/* SUBMIT */}
 
             <button
               className="onboarding-primary-button"
               type="submit"
             >
               {isRegistering
-                ? 'Create my BookNest'
-                : 'Enter BookNest'}
+                ? "Create my BookNest"
+                : "Enter BookNest"}
             </button>
 
           </form>
 
+          {/* LOGIN / REGISTER SWITCH */}
+
           <button
             className="onboarding-switch"
             type="button"
-            onClick={() => setIsRegistering(!isRegistering)}
+            onClick={() =>
+              setIsRegistering(
+                !isRegistering
+              )
+            }
           >
             {isRegistering
-              ? 'Already have an account? Log in'
+              ? "Already have an account? Log in"
               : "New here? Create an account"}
           </button>
 
         </div>
+
+        {/* DECORATION */}
 
         <div className="onboarding-decoration">
           <span>“</span>

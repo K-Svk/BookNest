@@ -1,10 +1,13 @@
 const bookRoutes = require("./routes/bookRoutes");
 const authRoutes = require("./routes/authRoutes");
 const testRoutes = require("./routes/testRoutes");
+const libraryRoutes = require("./routes/libraryRoutes");
 const connectDB = require("./config/db");
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+
+
 console.log("MONGO_URI exists:", !!process.env.MONGO_URI);
 const app = express();
 
@@ -14,6 +17,7 @@ app.use(express.json());
 app.use("/api/books", bookRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
+app.use("/api/library", libraryRoutes);
 
 app.get("/", (req, res) => {
   res.send("BookNest Backend is running!");
