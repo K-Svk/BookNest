@@ -203,7 +203,11 @@ router.get("/me", authenticateToken, async (req, res) => {
 
 router.put("/profile", authenticateToken, async (req, res) => {
   try {
-    const { username, bio } = req.body;
+    const {
+      username,
+      bio,
+      favoriteGenres,
+    } = req.body;
 
     const trimmedUsername =
       typeof username === "string"
@@ -243,6 +247,17 @@ router.put("/profile", authenticateToken, async (req, res) => {
     user.username = trimmedUsername;
     user.bio = trimmedBio;
 
+    if (Array.isArray(favoriteGenres)) {
+      user.favoriteGenres = favoriteGenres
+        .filter(
+          (genre) =>
+            typeof genre === "string" &&
+            genre.trim()
+        )
+        .map((genre) => genre.trim())
+        .slice(0, 5);
+    }
+
     const updatedUser = await user.save();
 
     res.status(200).json({
@@ -268,3 +283,4 @@ router.put("/profile", authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.authenticateToken = authenticateToken;

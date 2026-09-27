@@ -24,6 +24,9 @@ export default function BookModal({
   const [hypeCount, setHypeCount] = useState(24);
   const [rating, setRating] = useState(book.userRating || 0);
   const [review, setReview] = useState("");
+  const [savedReview, setSavedReview] = useState(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewSaving, setReviewSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [progressSaving, setProgressSaving] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
@@ -42,6 +45,8 @@ export default function BookModal({
     const savedPage = Number(book.currentPage) || 0;
 
     setRating(book.userRating || 0);
+    setReview("");
+    setSavedReview(null);
     setLocalStatus(book.status || null);
     setLocalLibraryEntryId(book.libraryEntryId || null);
     setCurrentPage(savedPage);
@@ -50,6 +55,39 @@ export default function BookModal({
     setBlurb(false);
     setCommentsOpen(false);
   }, [book]);
+
+  useEffect(() => {
+    if (!commentsOpen || !book.id) {
+      return;
+    }
+
+    const loadReview = async () => {
+      setReviewLoading(true);
+
+      try {
+        const existingReview =
+          await api.getMyReviewForBook(book.id);
+
+        if (existingReview) {
+          setSavedReview(existingReview);
+          setReview(existingReview.text || "");
+
+          if (existingReview.rating) {
+            setRating(Number(existingReview.rating));
+          }
+        } else {
+          setSavedReview(null);
+          setReview("");
+        }
+      } catch (error) {
+        console.error("FAILED TO LOAD REVIEW:", error);
+      } finally {
+        setReviewLoading(false);
+      }
+    };
+
+    loadReview();
+  }, [commentsOpen, book.id]);
 
   const totalPages = Number(book.pages) || 0;
 
@@ -260,6 +298,7 @@ export default function BookModal({
     if (
       actionLoading ||
       progressSaving ||
+      reviewSaving ||
       !book.id
     ) {
       return;
@@ -305,15 +344,60 @@ export default function BookModal({
     }
   };
 
-  const handleReview = () => {
-    if (!review.trim() || rating === 0) {
+  const handleReview = async () => {
+    const trimmedReview = review.trim();
+
+    if (
+      !trimmedReview ||
+      rating === 0 ||
+      reviewSaving ||
+      !book.id
+    ) {
       return;
     }
 
-    alert("Your review has been posted!");
+    setReviewSaving(true);
+    setActionMessage("");
 
-    setReview("");
-    setCommentsOpen(false);
+    try {
+      const saved = await api.saveReview({
+        bookId: book.id,
+        rating,
+        text: trimmedReview,
+      });
+
+      setSavedReview(saved);
+      setReview(saved?.text || trimmedReview);
+
+      if (saved?.rating) {
+        setRating(Number(saved.rating));
+      }
+
+      if (saved?.rating && onLibraryChange) {
+        if (localLibraryEntryId) {
+          const updatedEntry =
+            await api.updateLibraryEntry(
+              book.id,
+              {
+                rating: Number(saved.rating),
+              }
+            );
+
+          onLibraryChange(updatedEntry);
+        }
+      }
+
+      setActionMessage("Your review has been posted!");
+    } catch (error) {
+      console.error("REVIEW SAVE FAILED:", error);
+
+      setActionMessage(
+        error.message ||
+          "Could not post your review"
+      );
+    } finally {
+      setReviewSaving(false);
+    }
   };
 
   const isTbr = localStatus === "tbr";
@@ -649,6 +733,9 @@ export default function BookModal({
                             star
                           )
                         }
+                        disabled={
+                          reviewSaving
+                        }
                         aria-label={`Rate ${star} out of 5`}
                       >
                         <Star
@@ -675,21 +762,67 @@ export default function BookModal({
                   }
                   placeholder="What did you think about this book?"
                   rows={4}
+                  disabled={reviewLoading || reviewSaving}
                 />
 
                 <button
                   className="primary-btn"
                   onClick={handleReview}
                   disabled={
+                    reviewLoading ||
+                    reviewSaving ||
                     !review.trim() ||
                     rating === 0
                   }
                 >
-                  Post review
+                  {reviewSaving
+                    ? "Posting..."
+                    : savedReview
+                    ? "Update review"
+                    : "Post review"}
                 </button>
               </div>
 
+              {actionMessage && (
+                <p className="library-message">
+                  {actionMessage}
+                </p>
+              )}
+
               <div className="existing-reviews">
+                {savedReview && (
+                  <div className="review">
+                    <div className="review-top">
+                      <strong>
+                        You
+                      </strong>
+
+                      <div className="mini-stars">
+                        {[1, 2, 3, 4, 5].map(
+                          (star) => (
+                            <Star
+                              key={star}
+                              size={12}
+                              fill={
+                                star <=
+                                Number(
+                                  savedReview.rating
+                                )
+                                  ? "currentColor"
+                                  : "none"
+                              }
+                            />
+                          )
+                        )}
+                      </div>
+                    </div>
+
+                    <p>
+                      {savedReview.text}
+                    </p>
+                  </div>
+                )}
+
                 <div className="review">
                   <div className="review-top">
                     <strong>

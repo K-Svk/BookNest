@@ -229,6 +229,100 @@ export default function App() {
     fetchBooks();
   }, []);
 
+  useEffect(() => {
+    const syncSavedGenres = async () => {
+      const token =
+        localStorage.getItem("booknestToken");
+
+      const savedGenres =
+        localStorage.getItem("booknestGenres");
+
+      if (!token || !savedGenres) {
+        return;
+      }
+
+      try {
+        const genres = JSON.parse(savedGenres);
+
+        if (
+          !Array.isArray(genres) ||
+          genres.length === 0
+        ) {
+          return;
+        }
+
+        const meResponse = await fetch(
+          "http://localhost:5000/api/auth/me",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!meResponse.ok) {
+          return;
+        }
+
+        const user = await meResponse.json();
+
+        if (
+          Array.isArray(user.favoriteGenres) &&
+          user.favoriteGenres.length > 0
+        ) {
+          return;
+        }
+
+        const updateResponse = await fetch(
+          "http://localhost:5000/api/auth/profile",
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              username: user.username,
+              bio: user.bio || "",
+              favoriteGenres: genres,
+            }),
+          }
+        );
+
+        if (!updateResponse.ok) {
+          const error =
+            await updateResponse.json();
+
+          throw new Error(
+            error.message ||
+              "Failed to sync genres"
+          );
+        }
+
+        const updatedUser =
+          await updateResponse.json();
+
+        localStorage.setItem(
+          "booknestUser",
+          JSON.stringify(updatedUser.user)
+        );
+
+        console.log(
+          "GENRES SYNCED TO PROFILE:",
+          genres
+        );
+      } catch (error) {
+        console.error(
+          "FAILED TO SYNC SAVED GENRES:",
+          error
+        );
+      }
+    };
+
+    syncSavedGenres();
+  }, []);
+
   const fetchUserLibrary = async () => {
     const token =
       localStorage.getItem("booknestToken");
@@ -477,15 +571,70 @@ export default function App() {
     setOnboardingStep("login");
   };
 
-  const handleGenresComplete = (
+  const handleGenresComplete = async (
     genres
   ) => {
+    const token =
+      localStorage.getItem("booknestToken");
+
     setOnboardingGenres(genres);
 
     localStorage.setItem(
       "booknestGenres",
       JSON.stringify(genres)
     );
+
+    if (token) {
+      try {
+        const storedUser =
+          localStorage.getItem(
+            "booknestUser"
+          );
+
+        const parsedUser = storedUser
+          ? JSON.parse(storedUser)
+          : {};
+
+        const response = await fetch(
+          "http://localhost:5000/api/auth/profile",
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              username:
+                parsedUser.username || "",
+              bio:
+                parsedUser.bio || "",
+              favoriteGenres: genres,
+            }),
+          }
+        );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              "Failed to save genres"
+          );
+        }
+
+        localStorage.setItem(
+          "booknestUser",
+          JSON.stringify(data.user)
+        );
+      } catch (error) {
+        console.error(
+          "FAILED TO SAVE GENRES:",
+          error
+        );
+      }
+    }
 
     setOnboardingStep("ratings");
   };
@@ -635,6 +784,13 @@ export default function App() {
     setQuery("");
   };
 
+  const handleRecommended = () => {
+    setQuery("");
+    setSettings(false);
+    setModal(null);
+    setSection("recommendations");
+  };
+
   if (
     onboardingStep === "login"
   ) {
@@ -704,10 +860,9 @@ export default function App() {
           handleSection
         }
         section={section}
-        onRecommended={() => {
-          setQuery("");
-          setSection("home");
-        }}
+        onRecommended={
+          handleRecommended
+        }
         onSettings={() =>
           setSettings(true)
         }
@@ -729,6 +884,18 @@ export default function App() {
             subtitle="Waiting patiently"
             items={tbr}
             onOpen={setModal}
+          />
+        ) : section === "recommendations" ? (
+          <RecommendationsPage
+            genres={
+              onboardingGenres
+            }
+            ratings={
+              onboardingRatings
+            }
+            onFinish={() =>
+              setSection("home")
+            }
           />
         ) : isSearching ? (
           <Shelf

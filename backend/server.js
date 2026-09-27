@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
+const reviewRoutes = require("./routes/reviewRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const authRoutes = require("./routes/authRoutes");
 const testRoutes = require("./routes/testRoutes");
@@ -24,6 +25,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);

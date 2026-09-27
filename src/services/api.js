@@ -76,7 +76,6 @@ export const api = {
           errorMessage = error.message;
         }
       } catch {
-        // Ignore JSON parsing errors
       }
 
       throw new Error(errorMessage);
@@ -122,7 +121,6 @@ export const api = {
           errorMessage = error.message;
         }
       } catch {
-        // Ignore JSON parsing errors
       }
 
       throw new Error(errorMessage);
@@ -158,7 +156,6 @@ export const api = {
           errorMessage = error.message;
         }
       } catch {
-        // Ignore JSON parsing errors
       }
 
       throw new Error(errorMessage);
@@ -195,7 +192,120 @@ export const api = {
           errorMessage = error.message;
         }
       } catch {
-        // Ignore JSON parsing errors
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
+  getMyReviews: async () => {
+    const token = getToken();
+
+    if (!token) {
+      throw new Error("You are not logged in");
+    }
+
+    const response = await fetch(`${API_URL}/reviews/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Failed to fetch reviews";
+
+      try {
+        const error = await response.json();
+
+        if (error.message) {
+          errorMessage = error.message;
+        }
+      } catch {
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
+  getMyReviewForBook: async (bookId) => {
+    const token = getToken();
+
+    if (!token) {
+      throw new Error("You are not logged in");
+    }
+
+    if (!bookId) {
+      throw new Error("Book ID is required");
+    }
+
+    const response = await fetch(
+      `${API_URL}/reviews/book/${bookId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      let errorMessage = "Failed to fetch review";
+
+      try {
+        const error = await response.json();
+
+        if (error.message) {
+          errorMessage = error.message;
+        }
+      } catch {
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
+  saveReview: async ({
+    bookId,
+    rating,
+    text,
+  }) => {
+    const token = getToken();
+
+    if (!token) {
+      throw new Error("You are not logged in");
+    }
+
+    if (!bookId) {
+      throw new Error("Book ID is required");
+    }
+
+    const response = await fetch(`${API_URL}/reviews`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        bookId,
+        rating,
+        text,
+      }),
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Failed to save review";
+
+      try {
+        const error = await response.json();
+
+        if (error.message) {
+          errorMessage = error.message;
+        }
+      } catch {
       }
 
       throw new Error(errorMessage);
