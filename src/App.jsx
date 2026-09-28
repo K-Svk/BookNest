@@ -159,6 +159,20 @@ export default function App() {
         return "login";
       }
 
+      try {
+        const user = JSON.parse(existingUser);
+
+        if (
+          user?.onboardingCompleted === true ||
+          (Array.isArray(user?.favoriteGenres) &&
+            user.favoriteGenres.length > 0)
+        ) {
+          return "complete";
+        }
+      } catch {
+        return "login";
+      }
+
       if (!savedGenres) {
         return "genres";
       }
@@ -534,12 +548,42 @@ export default function App() {
       };
     }, [currentlyReadingBooks]);
 
-  const handleLoginComplete = () => {
+  const handleLoginComplete = (
+    user
+  ) => {
     setUserLibrary([]);
     setSection("home");
     setQuery("");
     setModal(null);
     setSettings(false);
+
+    const onboardingCompleted =
+      user?.onboardingCompleted === true ||
+      (Array.isArray(
+        user?.favoriteGenres
+      ) &&
+        user.favoriteGenres.length > 0);
+
+    if (onboardingCompleted) {
+      setOnboardingStep("complete");
+
+      if (
+        Array.isArray(user.favoriteGenres)
+      ) {
+        setOnboardingGenres(
+          user.favoriteGenres
+        );
+
+        localStorage.setItem(
+          "booknestGenres",
+          JSON.stringify(
+            user.favoriteGenres
+          )
+        );
+      }
+
+      return;
+    }
 
     setOnboardingStep("genres");
   };
@@ -654,7 +698,64 @@ export default function App() {
     );
   };
 
-  const finishOnboarding = () => {
+  const finishOnboarding = async () => {
+    const token =
+      localStorage.getItem("booknestToken");
+
+    if (token) {
+      try {
+        const storedUser =
+          localStorage.getItem(
+            "booknestUser"
+          );
+
+        const parsedUser = storedUser
+          ? JSON.parse(storedUser)
+          : {};
+
+        const response = await fetch(
+          "http://localhost:5000/api/auth/profile",
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              username:
+                parsedUser.username || "",
+              bio:
+                parsedUser.bio || "",
+              favoriteGenres:
+                onboardingGenres,
+              onboardingCompleted: true,
+            }),
+          }
+        );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              "Failed to complete onboarding"
+          );
+        }
+
+        localStorage.setItem(
+          "booknestUser",
+          JSON.stringify(data.user)
+        );
+      } catch (error) {
+        console.error(
+          "FAILED TO COMPLETE ONBOARDING:",
+          error
+        );
+      }
+    }
+
     setOnboardingStep("complete");
   };
 

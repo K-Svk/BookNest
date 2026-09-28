@@ -41,7 +41,9 @@ export const api = {
   },
 
   getBook: async (id) => {
-    const response = await fetch(`${API_URL}/books/${id}`);
+    const response = await fetch(
+      `${API_URL}/books/${id}`
+    );
 
     if (!response.ok) {
       throw new Error("Failed to fetch book");
@@ -59,21 +61,27 @@ export const api = {
       throw new Error("You are not logged in");
     }
 
-    const response = await fetch(`${API_URL}/library`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `${API_URL}/library`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
-      let errorMessage = "Failed to fetch library";
+      let errorMessage =
+        "Failed to fetch library";
 
       try {
-        const error = await response.json();
+        const error =
+          await response.json();
 
         if (error.message) {
-          errorMessage = error.message;
+          errorMessage =
+            error.message;
         }
       } catch {
       }
@@ -93,32 +101,42 @@ export const api = {
     const token = getToken();
 
     if (!token) {
-      throw new Error("You are not logged in");
+      throw new Error(
+        "You are not logged in"
+      );
     }
 
     if (!bookId) {
-      throw new Error("Book ID is required");
+      throw new Error(
+        "Book ID is required"
+      );
     }
 
-    const response = await fetch(`${API_URL}/library`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        bookId,
-        status,
-        currentPage,
-        rating,
-      }),
-    });
+    const response = await fetch(
+      `${API_URL}/library`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          bookId,
+          status,
+          currentPage,
+          rating,
+        }),
+      }
+    );
 
     if (!response.ok) {
-      let errorMessage = "Failed to add book to library";
+      let errorMessage =
+        "Failed to add book to library";
 
       try {
-        const error = await response.json();
+        const error =
+          await response.json();
 
         if (error.message) {
-          errorMessage = error.message;
+          errorMessage =
+            error.message;
         }
       } catch {
       }
@@ -129,31 +147,44 @@ export const api = {
     return response.json();
   },
 
-  updateLibraryEntry: async (bookId, updates) => {
+  updateLibraryEntry: async (
+    bookId,
+    updates
+  ) => {
     const token = getToken();
 
     if (!token) {
-      throw new Error("You are not logged in");
+      throw new Error(
+        "You are not logged in"
+      );
     }
 
     if (!bookId) {
-      throw new Error("Book ID is required");
+      throw new Error(
+        "Book ID is required"
+      );
     }
 
-    const response = await fetch(`${API_URL}/library/${bookId}`, {
-      method: "PUT",
-      headers: getAuthHeaders(),
-      body: JSON.stringify(updates),
-    });
+    const response = await fetch(
+      `${API_URL}/library/${bookId}`,
+      {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(updates),
+      }
+    );
 
     if (!response.ok) {
-      let errorMessage = "Failed to update library entry";
+      let errorMessage =
+        "Failed to update library entry";
 
       try {
-        const error = await response.json();
+        const error =
+          await response.json();
 
         if (error.message) {
-          errorMessage = error.message;
+          errorMessage =
+            error.message;
         }
       } catch {
       }
@@ -164,32 +195,44 @@ export const api = {
     return response.json();
   },
 
-  removeFromLibrary: async (bookId) => {
+  removeFromLibrary: async (
+    bookId
+  ) => {
     const token = getToken();
 
     if (!token) {
-      throw new Error("You are not logged in");
+      throw new Error(
+        "You are not logged in"
+      );
     }
 
     if (!bookId) {
-      throw new Error("Book ID is required");
+      throw new Error(
+        "Book ID is required"
+      );
     }
 
-    const response = await fetch(`${API_URL}/library/${bookId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `${API_URL}/library/${bookId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
-      let errorMessage = "Failed to remove book from library";
+      let errorMessage =
+        "Failed to remove book from library";
 
       try {
-        const error = await response.json();
+        const error =
+          await response.json();
 
         if (error.message) {
-          errorMessage = error.message;
+          errorMessage =
+            error.message;
         }
       } catch {
       }
@@ -204,24 +247,32 @@ export const api = {
     const token = getToken();
 
     if (!token) {
-      throw new Error("You are not logged in");
+      throw new Error(
+        "You are not logged in"
+      );
     }
 
-    const response = await fetch(`${API_URL}/reviews/me`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `${API_URL}/reviews/me`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
-      let errorMessage = "Failed to fetch reviews";
+      let errorMessage =
+        "Failed to fetch reviews";
 
       try {
-        const error = await response.json();
+        const error =
+          await response.json();
 
         if (error.message) {
-          errorMessage = error.message;
+          errorMessage =
+            error.message;
         }
       } catch {
       }
@@ -232,15 +283,21 @@ export const api = {
     return response.json();
   },
 
-  getMyReviewForBook: async (bookId) => {
+  getMyReviewForBook: async (
+    bookId
+  ) => {
     const token = getToken();
 
     if (!token) {
-      throw new Error("You are not logged in");
+      throw new Error(
+        "You are not logged in"
+      );
     }
 
     if (!bookId) {
-      throw new Error("Book ID is required");
+      throw new Error(
+        "Book ID is required"
+      );
     }
 
     const response = await fetch(
@@ -254,13 +311,64 @@ export const api = {
     );
 
     if (!response.ok) {
-      let errorMessage = "Failed to fetch review";
+      let errorMessage =
+        "Failed to fetch review";
 
       try {
-        const error = await response.json();
+        const error =
+          await response.json();
 
         if (error.message) {
-          errorMessage = error.message;
+          errorMessage =
+            error.message;
+        }
+      } catch {
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
+  getBookReviews: async (
+    bookId
+  ) => {
+    const token = getToken();
+
+    if (!token) {
+      throw new Error(
+        "You are not logged in"
+      );
+    }
+
+    if (!bookId) {
+      throw new Error(
+        "Book ID is required"
+      );
+    }
+
+    const response = await fetch(
+      `${API_URL}/reviews/book/${bookId}/all`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      let errorMessage =
+        "Failed to fetch book reviews";
+
+      try {
+        const error =
+          await response.json();
+
+        if (error.message) {
+          errorMessage =
+            error.message;
         }
       } catch {
       }
@@ -279,31 +387,163 @@ export const api = {
     const token = getToken();
 
     if (!token) {
-      throw new Error("You are not logged in");
+      throw new Error(
+        "You are not logged in"
+      );
     }
 
     if (!bookId) {
-      throw new Error("Book ID is required");
+      throw new Error(
+        "Book ID is required"
+      );
     }
 
-    const response = await fetch(`${API_URL}/reviews`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        bookId,
-        rating,
-        text,
-      }),
-    });
+    const response = await fetch(
+      `${API_URL}/reviews`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          bookId,
+          rating,
+          text,
+        }),
+      }
+    );
 
     if (!response.ok) {
-      let errorMessage = "Failed to save review";
+      let errorMessage =
+        "Failed to save review";
 
       try {
-        const error = await response.json();
+        const error =
+          await response.json();
 
         if (error.message) {
-          errorMessage = error.message;
+          errorMessage =
+            error.message;
+        }
+      } catch {
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
+  likeReview: async (
+    reviewId
+  ) => {
+    const token = getToken();
+
+    if (!token) {
+      throw new Error(
+        "You are not logged in"
+      );
+    }
+
+    const response = await fetch(
+      `${API_URL}/reviews/${reviewId}/like`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      let errorMessage =
+        "Failed to like review";
+
+      try {
+        const error =
+          await response.json();
+
+        if (error.message) {
+          errorMessage =
+            error.message;
+        }
+      } catch {
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
+  unlikeReview: async (
+    reviewId
+  ) => {
+    const token = getToken();
+
+    if (!token) {
+      throw new Error(
+        "You are not logged in"
+      );
+    }
+
+    const response = await fetch(
+      `${API_URL}/reviews/${reviewId}/like`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      let errorMessage =
+        "Failed to unlike review";
+
+      try {
+        const error =
+          await response.json();
+
+        if (error.message) {
+          errorMessage =
+            error.message;
+        }
+      } catch {
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
+  getNotifications: async () => {
+    const token = getToken();
+
+    if (!token) {
+      throw new Error(
+        "You are not logged in"
+      );
+    }
+
+    const response = await fetch(
+      `${API_URL}/notifications`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      let errorMessage =
+        "Failed to fetch notifications";
+
+      try {
+        const error =
+          await response.json();
+
+        if (error.message) {
+          errorMessage =
+            error.message;
         }
       } catch {
       }

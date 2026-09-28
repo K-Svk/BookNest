@@ -36,6 +36,7 @@ function Rating({ rating }) {
 export default function ProfilePanel() {
   const [user, setUser] = useState(null);
   const [library, setLibrary] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [editingProfile, setEditingProfile] = useState(false);
@@ -56,38 +57,57 @@ export default function ProfilePanel() {
       try {
         setLoading(true);
 
-        const profileResponse = await fetch(`${API_URL}/auth/me`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+
+        const [
+          profileResponse,
+          libraryResponse,
+          reviewsResponse,
+        ] = await Promise.all([
+          fetch(`${API_URL}/auth/me`, {
+            method: "GET",
+            headers,
+          }),
+          fetch(`${API_URL}/library`, {
+            method: "GET",
+            headers,
+          }),
+          fetch(`${API_URL}/reviews/me`, {
+            method: "GET",
+            headers,
+          }),
+        ]);
 
         if (!profileResponse.ok) {
           throw new Error("Failed to fetch profile");
         }
 
-        const profileData = await profileResponse.json();
-
-        const libraryResponse = await fetch(`${API_URL}/library`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
         if (!libraryResponse.ok) {
           throw new Error("Failed to fetch library");
         }
 
+        if (!reviewsResponse.ok) {
+          throw new Error("Failed to fetch reviews");
+        }
+
+        const profileData = await profileResponse.json();
         const libraryData = await libraryResponse.json();
+        const reviewsData = await reviewsResponse.json();
 
         setUser(profileData);
-        setLibrary(Array.isArray(libraryData) ? libraryData : []);
+        setLibrary(
+          Array.isArray(libraryData) ? libraryData : []
+        );
+        setReviews(
+          Array.isArray(reviewsData) ? reviewsData : []
+        );
       } catch (error) {
         console.error("FAILED TO LOAD PROFILE:", error);
         setUser(null);
         setLibrary([]);
+        setReviews([]);
       } finally {
         setLoading(false);
       }
@@ -121,6 +141,21 @@ export default function ProfilePanel() {
           return dateB - dateA;
         }),
     [readBooks]
+  );
+
+  const recentReviews = useMemo(
+    () =>
+      [...reviews].sort((a, b) => {
+        const dateA = new Date(
+          a.updatedAt || a.createdAt || 0
+        );
+        const dateB = new Date(
+          b.updatedAt || b.createdAt || 0
+        );
+
+        return dateB - dateA;
+      }),
+    [reviews]
   );
 
   const joinedYear = user?.createdAt
@@ -396,31 +431,37 @@ export default function ProfilePanel() {
             </div>
 
             <div className="review-list">
-              {ratedBooks.length > 0 ? (
-                ratedBooks.slice(0, 3).map((entry) => (
+              {recentReviews.length > 0 ? (
+                recentReviews.slice(0, 3).map((review) => (
                   <article
                     className="review-card"
-                    key={entry._id}
+                    key={review._id}
                   >
                     <div className="review-card-top">
                       <div>
                         <h3>
-                          {entry.book?.title || "Untitled book"}
+                          {review.book?.title ||
+                            "Untitled book"}
                         </h3>
+
                         <p>
-                          {entry.book?.author || "Unknown author"}
+                          {review.book?.author ||
+                            "Unknown author"}
                         </p>
                       </div>
 
-                      <Rating rating={entry.rating} />
+                      <Rating rating={review.rating} />
                     </div>
 
                     <p className="review-text">
-                      You rated this book {entry.rating} out of 5.
+                      {review.text}
                     </p>
 
                     <div className="review-footer">
-                      <span>Rated on BookNest</span>
+                      <span>
+                        Reviewed on BookNest
+                      </span>
+
                       <MessageCircle size={14} />
                     </div>
                   </article>
@@ -429,13 +470,16 @@ export default function ProfilePanel() {
                 <article className="review-card">
                   <div className="review-card-top">
                     <div>
-                      <h3>No ratings yet</h3>
-                      <p>Your reading journal is waiting.</p>
+                      <h3>No reviews yet</h3>
+                      <p>
+                        Your reading journal is waiting.
+                      </p>
                     </div>
                   </div>
 
                   <p className="review-text">
-                    Rate books you've read and they'll appear here.
+                    Write a review for a book and it
+                    will appear here.
                   </p>
                 </article>
               )}
@@ -501,7 +545,10 @@ export default function ProfilePanel() {
             <div className="hyped-books">
               {tbrBooks.length > 0 ? (
                 tbrBooks.slice(0, 3).map((entry) => (
-                  <div className="hyped-book" key={entry._id}>
+                  <div
+                    className="hyped-book"
+                    key={entry._id}
+                  >
                     {entry.book?.coverImage ? (
                       <img
                         src={entry.book.coverImage}
@@ -519,13 +566,16 @@ export default function ProfilePanel() {
                     <div>
                       <h3>{entry.book?.title}</h3>
                       <p>
-                        {entry.book?.author || "Unknown author"}
+                        {entry.book?.author ||
+                          "Unknown author"}
                       </p>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="profile-bio">Your TBR is empty.</p>
+                <p className="profile-bio">
+                  Your TBR is empty.
+                </p>
               )}
             </div>
           </section>
@@ -557,6 +607,7 @@ export default function ProfilePanel() {
                 <p className="profile-section-kicker">
                   YOUR PROFILE
                 </p>
+
                 <h2>Edit profile</h2>
               </div>
 
@@ -629,7 +680,9 @@ export default function ProfilePanel() {
                 disabled={savingProfile}
               >
                 <Check size={16} />
-                {savingProfile ? "Saving..." : "Save changes"}
+                {savingProfile
+                  ? "Saving..."
+                  : "Save changes"}
               </button>
             </div>
           </div>

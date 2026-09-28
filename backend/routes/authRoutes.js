@@ -55,7 +55,8 @@ router.post("/register", async (req, res) => {
 
     if (!username || !email || !password) {
       return res.status(400).json({
-        message: "Username, email and password are required",
+        message:
+          "Username, email and password are required",
       });
     }
 
@@ -65,16 +66,19 @@ router.post("/register", async (req, res) => {
 
     if (existingUser) {
       return res.status(400).json({
-        message: "Username or email already exists",
+        message:
+          "Username or email already exists",
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword =
+      await bcrypt.hash(password, 10);
 
     const user = new User({
       username,
       email,
       password: hashedPassword,
+      onboardingCompleted: false,
     });
 
     const savedUser = await user.save();
@@ -96,13 +100,20 @@ router.post("/register", async (req, res) => {
         id: savedUser._id,
         username: savedUser.username,
         email: savedUser.email,
-        profilePicture: savedUser.profilePicture,
+        profilePicture:
+          savedUser.profilePicture,
         bio: savedUser.bio,
-        favoriteGenres: savedUser.favoriteGenres,
+        favoriteGenres:
+          savedUser.favoriteGenres,
+        onboardingCompleted:
+          savedUser.onboardingCompleted,
       },
     });
   } catch (error) {
-    console.error("REGISTRATION ERROR:", error);
+    console.error(
+      "REGISTRATION ERROR:",
+      error
+    );
 
     res.status(500).json({
       message: "Registration failed",
@@ -117,11 +128,14 @@ router.post("/login", async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        message: "Email and password are required",
+        message:
+          "Email and password are required",
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email,
+    });
 
     if (!user) {
       return res.status(400).json({
@@ -129,15 +143,32 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const isPasswordCorrect =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
 
     if (!isPasswordCorrect) {
       return res.status(400).json({
         message: "Invalid email or password",
       });
+    }
+
+    const existingUserHasGenres =
+      Array.isArray(user.favoriteGenres) &&
+      user.favoriteGenres.length > 0;
+
+    const onboardingCompleted =
+      user.onboardingCompleted ||
+      existingUserHasGenres;
+
+    if (
+      existingUserHasGenres &&
+      !user.onboardingCompleted
+    ) {
+      user.onboardingCompleted = true;
+      await user.save();
     }
 
     const token = jwt.sign(
@@ -157,13 +188,19 @@ router.post("/login", async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        profilePicture: user.profilePicture,
+        profilePicture:
+          user.profilePicture,
         bio: user.bio,
-        favoriteGenres: user.favoriteGenres,
+        favoriteGenres:
+          user.favoriteGenres,
+        onboardingCompleted,
       },
     });
   } catch (error) {
-    console.error("LOGIN ERROR:", error);
+    console.error(
+      "LOGIN ERROR:",
+      error
+    );
 
     res.status(500).json({
       message: "Login failed",
@@ -172,115 +209,179 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/me", authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.userId).select("-password");
+router.get(
+  "/me",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const user =
+        await User.findById(
+          req.userId
+        ).select("-password");
 
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+
+      const existingUserHasGenres =
+        Array.isArray(user.favoriteGenres) &&
+        user.favoriteGenres.length > 0;
+
+      const onboardingCompleted =
+        user.onboardingCompleted ||
+        existingUserHasGenres;
+
+      res.status(200).json({
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        profilePicture:
+          user.profilePicture,
+        bio: user.bio,
+        favoriteGenres:
+          user.favoriteGenres,
+        onboardingCompleted,
+        createdAt: user.createdAt,
+      });
+    } catch (error) {
+      console.error(
+        "GET CURRENT USER ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to fetch user profile",
+        error: error.message,
       });
     }
-
-    res.status(200).json({
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      profilePicture: user.profilePicture,
-      bio: user.bio,
-      favoriteGenres: user.favoriteGenres,
-      createdAt: user.createdAt,
-    });
-  } catch (error) {
-    console.error("GET CURRENT USER ERROR:", error);
-
-    res.status(500).json({
-      message: "Failed to fetch user profile",
-      error: error.message,
-    });
   }
-});
+);
 
-router.put("/profile", authenticateToken, async (req, res) => {
-  try {
-    const {
-      username,
-      bio,
-      favoriteGenres,
-    } = req.body;
+router.put(
+  "/profile",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const {
+        username,
+        bio,
+        favoriteGenres,
+        onboardingCompleted,
+      } = req.body;
 
-    const trimmedUsername =
-      typeof username === "string"
-        ? username.trim()
-        : "";
+      const trimmedUsername =
+        typeof username === "string"
+          ? username.trim()
+          : "";
 
-    const trimmedBio =
-      typeof bio === "string"
-        ? bio.trim()
-        : "";
+      const trimmedBio =
+        typeof bio === "string"
+          ? bio.trim()
+          : "";
 
-    if (!trimmedUsername) {
-      return res.status(400).json({
-        message: "Name cannot be empty",
+      if (!trimmedUsername) {
+        return res.status(400).json({
+          message:
+            "Name cannot be empty",
+        });
+      }
+
+      const existingUser =
+        await User.findOne({
+          username: trimmedUsername,
+          _id: {
+            $ne: req.userId,
+          },
+        });
+
+      if (existingUser) {
+        return res.status(400).json({
+          message:
+            "That name is already taken",
+        });
+      }
+
+      const user =
+        await User.findById(
+          req.userId
+        );
+
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+
+      user.username =
+        trimmedUsername;
+
+      user.bio =
+        trimmedBio;
+
+      if (Array.isArray(favoriteGenres)) {
+        user.favoriteGenres =
+          favoriteGenres
+            .filter(
+              (genre) =>
+                typeof genre ===
+                  "string" &&
+                genre.trim()
+            )
+            .map((genre) =>
+              genre.trim()
+            )
+            .slice(0, 5);
+      }
+
+      if (
+        typeof onboardingCompleted ===
+        "boolean"
+      ) {
+        user.onboardingCompleted =
+          onboardingCompleted;
+      }
+
+      const updatedUser =
+        await user.save();
+
+      res.status(200).json({
+        message:
+          "Profile updated successfully",
+        user: {
+          id: updatedUser._id,
+          username:
+            updatedUser.username,
+          email:
+            updatedUser.email,
+          profilePicture:
+            updatedUser.profilePicture,
+          bio: updatedUser.bio,
+          favoriteGenres:
+            updatedUser.favoriteGenres,
+          onboardingCompleted:
+            updatedUser.onboardingCompleted,
+          createdAt:
+            updatedUser.createdAt,
+        },
+      });
+    } catch (error) {
+      console.error(
+        "UPDATE PROFILE ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to update profile",
+        error: error.message,
       });
     }
-
-    const existingUser = await User.findOne({
-      username: trimmedUsername,
-      _id: { $ne: req.userId },
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        message: "That name is already taken",
-      });
-    }
-
-    const user = await User.findById(req.userId);
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
-    user.username = trimmedUsername;
-    user.bio = trimmedBio;
-
-    if (Array.isArray(favoriteGenres)) {
-      user.favoriteGenres = favoriteGenres
-        .filter(
-          (genre) =>
-            typeof genre === "string" &&
-            genre.trim()
-        )
-        .map((genre) => genre.trim())
-        .slice(0, 5);
-    }
-
-    const updatedUser = await user.save();
-
-    res.status(200).json({
-      message: "Profile updated successfully",
-      user: {
-        id: updatedUser._id,
-        username: updatedUser.username,
-        email: updatedUser.email,
-        profilePicture: updatedUser.profilePicture,
-        bio: updatedUser.bio,
-        favoriteGenres: updatedUser.favoriteGenres,
-        createdAt: updatedUser.createdAt,
-      },
-    });
-  } catch (error) {
-    console.error("UPDATE PROFILE ERROR:", error);
-
-    res.status(500).json({
-      message: "Failed to update profile",
-      error: error.message,
-    });
   }
-});
+);
 
 module.exports = router;
-module.exports.authenticateToken = authenticateToken;
+module.exports.authenticateToken =
+  authenticateToken;

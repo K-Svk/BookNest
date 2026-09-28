@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Search,
   Sparkles,
@@ -6,27 +6,9 @@ import {
   Bookmark,
   UserRound,
   SlidersHorizontal,
-  Heart
-} from 'lucide-react';
-
-const likedBy = [
-  {
-    name: 'Ananya',
-    text: 'liked your review of The Midnight Library'
-  },
-  {
-    name: 'Rhea',
-    text: 'liked your review of Piranesi'
-  },
-  {
-    name: 'Nisha',
-    text: 'liked your review of A Man Called Ove'
-  },
-  {
-    name: 'Aditi',
-    text: 'liked your review of The Book Thief'
-  }
-];
+  Heart,
+} from "lucide-react";
+import { api } from "../services/api";
 
 export default function Topbar({
   query,
@@ -34,16 +16,66 @@ export default function Topbar({
   onSection,
   section,
   onRecommended,
-  onSettings
+  onSettings,
 }) {
   const [likesOpen, setLikesOpen] =
     useState(false);
+  const [notifications, setNotifications] =
+    useState([]);
+  const [
+    notificationsLoading,
+    setNotificationsLoading,
+  ] = useState(false);
+
+  const loadNotifications = async () => {
+    try {
+      setNotificationsLoading(true);
+
+      const data =
+        await api.getNotifications();
+
+      setNotifications(
+        Array.isArray(data)
+          ? data
+          : []
+      );
+    } catch (error) {
+      console.error(
+        "FAILED TO LOAD NOTIFICATIONS:",
+        error
+      );
+
+      setNotifications([]);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+
+    const interval = setInterval(
+      loadNotifications,
+      15000
+    );
+
+    return () =>
+      clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (likesOpen) {
+      loadNotifications();
+    }
+  }, [likesOpen]);
 
   return (
     <header className="topbar">
       <button
         className="wordmark"
-        onClick={() => onSection('home')}
+        onClick={() =>
+          onSection("home")
+        }
       >
         <span className="wordmark-mark">
           b
@@ -76,9 +108,13 @@ export default function Topbar({
       <div className="nav-actions">
         <button
           className={`icon-button ${
-            section === 'read' ? 'active' : ''
+            section === "read"
+              ? "active"
+              : ""
           }`}
-          onClick={() => onSection('read')}
+          onClick={() =>
+            onSection("read")
+          }
           aria-label="Read books"
         >
           <BookOpen size={22} />
@@ -86,9 +122,13 @@ export default function Topbar({
 
         <button
           className={`icon-button ${
-            section === 'tbr' ? 'active' : ''
+            section === "tbr"
+              ? "active"
+              : ""
           }`}
-          onClick={() => onSection('tbr')}
+          onClick={() =>
+            onSection("tbr")
+          }
           aria-label="TBR"
         >
           <Bookmark size={21} />
@@ -97,10 +137,14 @@ export default function Topbar({
         <div className="likes-wrap">
           <button
             className={`icon-button ${
-              likesOpen ? 'active' : ''
+              likesOpen
+                ? "active"
+                : ""
             }`}
             onClick={() =>
-              setLikesOpen((current) => !current)
+              setLikesOpen(
+                (current) => !current
+              )
             }
             aria-label="People who liked your reviews"
           >
@@ -108,13 +152,13 @@ export default function Topbar({
               size={21}
               fill={
                 likesOpen
-                  ? 'currentColor'
-                  : 'none'
+                  ? "currentColor"
+                  : "none"
               }
             />
 
             <span className="likes-count">
-              {likedBy.length}
+              {notifications.length}
             </span>
           </button>
 
@@ -132,33 +176,73 @@ export default function Topbar({
                 </div>
 
                 <span>
-                  {likedBy.length}
+                  {notifications.length}
                 </span>
               </div>
 
               <div className="likes-list">
-                {likedBy.map((person) => (
-                  <div
-                    className="like-person"
-                    key={person.name}
-                  >
-                    <div className="like-avatar">
-                      {person.name
-                        .charAt(0)
-                        .toUpperCase()}
-                    </div>
-
+                {notificationsLoading ? (
+                  <div className="like-person">
                     <div>
-                      <strong>
-                        {person.name}
-                      </strong>
-
                       <span>
-                        {person.text}
+                        Loading notifications...
                       </span>
                     </div>
                   </div>
-                ))}
+                ) : notifications.length >
+                  0 ? (
+                  notifications.map(
+                    (notification) => {
+                      const name =
+                        notification
+                          .actor
+                          ?.username ||
+                        "BookNest reader";
+
+                      const bookTitle =
+                        notification
+                          .book
+                          ?.title ||
+                        "your book";
+
+                      return (
+                        <div
+                          className="like-person"
+                          key={
+                            notification._id
+                          }
+                        >
+                          <div className="like-avatar">
+                            {name
+                              .charAt(
+                                0
+                              )
+                              .toUpperCase()}
+                          </div>
+
+                          <div>
+                            <strong>
+                              {name}
+                            </strong>
+
+                            <span>
+                              liked your review of{" "}
+                              {bookTitle}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )
+                ) : (
+                  <div className="like-person">
+                    <div>
+                      <span>
+                        No one has liked your reviews yet.
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -166,9 +250,13 @@ export default function Topbar({
 
         <button
           className={`icon-button ${
-            section === 'profile' ? 'active' : ''
+            section === "profile"
+              ? "active"
+              : ""
           }`}
-          onClick={() => onSection('profile')}
+          onClick={() =>
+            onSection("profile")
+          }
           aria-label="Profile"
         >
           <UserRound size={22} />
@@ -179,7 +267,9 @@ export default function Topbar({
           onClick={onSettings}
           aria-label="Settings"
         >
-          <SlidersHorizontal size={22} />
+          <SlidersHorizontal
+            size={22}
+          />
         </button>
       </div>
     </header>
