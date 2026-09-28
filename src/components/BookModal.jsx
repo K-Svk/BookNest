@@ -19,448 +19,270 @@ export default function BookModal({
   onLibraryChange,
 }) {
   const [blurb, setBlurb] = useState(false);
-  const [commentsOpen, setCommentsOpen] =
-    useState(false);
-  const [rating, setRating] = useState(
-    book.userRating || 0
-  );
-  const [review, setReview] =
-    useState("");
-  const [savedReview, setSavedReview] =
-    useState(null);
-  const [allReviews, setAllReviews] =
-    useState([]);
-  const [reviewLoading, setReviewLoading] =
-    useState(false);
-  const [reviewSaving, setReviewSaving] =
-    useState(false);
-  const [reviewLikeLoading, setReviewLikeLoading] =
-    useState({});
-  const [actionLoading, setActionLoading] =
-    useState(false);
-  const [progressSaving, setProgressSaving] =
-    useState(false);
-  const [actionMessage, setActionMessage] =
-    useState("");
-  const [localStatus, setLocalStatus] =
-    useState(book.status || null);
-  const [
-    localLibraryEntryId,
-    setLocalLibraryEntryId,
-  ] = useState(
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [rating, setRating] = useState(book.userRating || 0);
+  const [review, setReview] = useState("");
+  const [savedReview, setSavedReview] = useState(null);
+  const [allReviews, setAllReviews] = useState([]);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewSaving, setReviewSaving] = useState(false);
+  const [reviewLikeLoading, setReviewLikeLoading] = useState({});
+  const [actionLoading, setActionLoading] = useState(false);
+  const [progressSaving, setProgressSaving] = useState(false);
+  const [actionMessage, setActionMessage] = useState("");
+  const [localStatus, setLocalStatus] = useState(book.status || null);
+  const [localLibraryEntryId, setLocalLibraryEntryId] = useState(
     book.libraryEntryId || null
   );
-  const [currentPage, setCurrentPage] =
-    useState(
-      Number(book.currentPage) || 0
-    );
-  const [pageInput, setPageInput] =
-    useState(
-      String(
-        Number(book.currentPage) || 0
-      )
-    );
+  const [currentPage, setCurrentPage] = useState(
+    Number(book.currentPage) || 0
+  );
+  const [pageInput, setPageInput] = useState(
+    String(Number(book.currentPage) || 0)
+  );
 
   useEffect(() => {
-    const savedPage =
-      Number(book.currentPage) || 0;
+    const savedPage = Number(book.currentPage) || 0;
 
-    setRating(
-      book.userRating || 0
-    );
+    setRating(book.userRating || 0);
     setReview("");
     setSavedReview(null);
     setAllReviews([]);
     setReviewLikeLoading({});
-    setLocalStatus(
-      book.status || null
-    );
-    setLocalLibraryEntryId(
-      book.libraryEntryId || null
-    );
+    setLocalStatus(book.status || null);
+    setLocalLibraryEntryId(book.libraryEntryId || null);
     setCurrentPage(savedPage);
-    setPageInput(
-      String(savedPage)
-    );
+    setPageInput(String(savedPage));
     setActionMessage("");
     setBlurb(false);
     setCommentsOpen(false);
-  }, [book]);
+  }, [book.id]);
 
   useEffect(() => {
-    if (
-      !commentsOpen ||
-      !book.id
-    ) {
+    if (!commentsOpen || !book.id) {
       return;
     }
 
-    const loadReviews =
-      async () => {
-        setReviewLoading(true);
+    const loadReviews = async () => {
+      setReviewLoading(true);
 
-        try {
-          const [
-            existingReview,
-            bookReviews,
-          ] =
-            await Promise.all([
-              api.getMyReviewForBook(
-                book.id
-              ),
-              api.getBookReviews(
-                book.id
-              ),
-            ]);
+      try {
+        const [existingReview, bookReviews] = await Promise.all([
+          api.getMyReviewForBook(book.id),
+          api.getBookReviews(book.id),
+        ]);
 
-          if (existingReview) {
-            setSavedReview(
-              existingReview
-            );
+        if (existingReview) {
+          setSavedReview(existingReview);
+          setReview(existingReview.text || "");
 
-            setReview(
-              existingReview.text ||
-                ""
-            );
-
-            if (
-              existingReview.rating
-            ) {
-              setRating(
-                Number(
-                  existingReview.rating
-                )
-              );
-            }
-          } else {
-            setSavedReview(
-              null
-            );
-            setReview("");
+          if (existingReview.rating) {
+            setRating(Number(existingReview.rating));
           }
-
-          setAllReviews(
-            Array.isArray(
-              bookReviews
-            )
-              ? bookReviews
-              : []
-          );
-        } catch (error) {
-          console.error(
-            "FAILED TO LOAD REVIEWS:",
-            error
-          );
-        } finally {
-          setReviewLoading(false);
+        } else {
+          setSavedReview(null);
+          setReview("");
         }
-      };
+
+        setAllReviews(
+          Array.isArray(bookReviews) ? bookReviews : []
+        );
+      } catch (error) {
+        console.error("FAILED TO LOAD REVIEWS:", error);
+      } finally {
+        setReviewLoading(false);
+      }
+    };
 
     loadReviews();
-  }, [
-    commentsOpen,
-    book.id,
-  ]);
+  }, [commentsOpen, book.id]);
 
-  const totalPages =
-    Number(book.pages) || 0;
+  const totalPages = Number(book.pages) || 0;
 
   const progressPercentage =
     totalPages > 0
       ? Math.min(
           100,
-          Math.round(
-            (currentPage /
-              totalPages) *
-              100
-          )
+          Math.round((currentPage / totalPages) * 100)
         )
       : 0;
 
-  const updateLibrary =
-    async (status) => {
-      if (
-        actionLoading ||
-        !book.id
-      ) {
-        return;
+  const updateLibrary = async (status) => {
+    if (actionLoading || !book.id) {
+      return;
+    }
+
+    setActionLoading(true);
+    setActionMessage("");
+
+    try {
+      let updatedEntry;
+
+      if (localLibraryEntryId) {
+        updatedEntry = await api.updateLibraryEntry(book.id, {
+          status,
+        });
+      } else {
+        updatedEntry = await api.addToLibrary({
+          bookId: book.id,
+          status,
+        });
       }
 
-      setActionLoading(true);
-      setActionMessage("");
+      setLocalStatus(updatedEntry?.status || status);
 
-      try {
-        let updatedEntry;
-
-        if (
-          localLibraryEntryId
-        ) {
-          updatedEntry =
-            await api.updateLibraryEntry(
-              book.id,
-              {
-                status,
-              }
-            );
-        } else {
-          updatedEntry =
-            await api.addToLibrary({
-              bookId: book.id,
-              status,
-            });
-        }
-
-        setLocalStatus(
-          updatedEntry?.status ||
-            status
-        );
-
-        if (
-          updatedEntry?._id
-        ) {
-          setLocalLibraryEntryId(
-            updatedEntry._id
-          );
-        }
-
-        if (
-          updatedEntry?.currentPage !==
-          undefined
-        ) {
-          const savedPage =
-            Number(
-              updatedEntry.currentPage
-            ) || 0;
-
-          setCurrentPage(
-            savedPage
-          );
-
-          setPageInput(
-            String(savedPage)
-          );
-        }
-
-        if (onLibraryChange) {
-          onLibraryChange(
-            updatedEntry
-          );
-        }
-
-        const messages = {
-          tbr: "Added to your TBR",
-          currently:
-            "Now currently reading",
-          read: "Marked as read",
-        };
-
-        setActionMessage(
-          messages[status] ||
-            "Library updated"
-        );
-      } catch (error) {
-        console.error(
-          "LIBRARY UPDATE FAILED:",
-          error
-        );
-
-        setActionMessage(
-          error.message ||
-            "Something went wrong"
-        );
-      } finally {
-        setActionLoading(false);
-      }
-    };
-
-  const handleProgressSave =
-    async () => {
-      if (
-        progressSaving ||
-        actionLoading ||
-        !book.id
-      ) {
-        return;
+      if (updatedEntry?._id) {
+        setLocalLibraryEntryId(updatedEntry._id);
       }
 
-      const enteredPage =
-        Number(pageInput);
+      if (updatedEntry?.currentPage !== undefined) {
+        const savedPage = Number(updatedEntry.currentPage) || 0;
 
-      if (
-        !Number.isFinite(
-          enteredPage
-        )
-      ) {
-        setActionMessage(
-          "Please enter a valid page number"
-        );
-
-        return;
+        setCurrentPage(savedPage);
+        setPageInput(String(savedPage));
       }
 
-      const clampedPage =
-        Math.max(
-          0,
-          totalPages > 0
-            ? Math.min(
-                Math.floor(
-                  enteredPage
-                ),
-                totalPages
-              )
-            : Math.floor(
-                enteredPage
-              )
-        );
+      if (onLibraryChange) {
+        onLibraryChange(updatedEntry);
+      }
 
-      setProgressSaving(true);
-      setActionMessage("");
+      const messages = {
+        tbr: "Added to your TBR",
+        currently: "Now currently reading",
+        read: "Marked as read",
+      };
 
-      try {
-        let updatedEntry;
+      setActionMessage(messages[status] || "Library updated");
+    } catch (error) {
+      console.error("LIBRARY UPDATE FAILED:", error);
 
-        if (
-          localLibraryEntryId
-        ) {
-          updatedEntry =
-            await api.updateLibraryEntry(
-              book.id,
-              {
-                currentPage:
-                  clampedPage,
-              }
-            );
-        } else {
-          updatedEntry =
-            await api.addToLibrary({
-              bookId: book.id,
-              status: "currently",
-              currentPage:
-                clampedPage,
-            });
+      setActionMessage(
+        error.message || "Something went wrong"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-          setLocalStatus(
-            "currently"
-          );
+  const handleProgressSave = async () => {
+    if (
+      progressSaving ||
+      actionLoading ||
+      !book.id
+    ) {
+      return;
+    }
 
-          if (
-            updatedEntry?._id
-          ) {
-            setLocalLibraryEntryId(
-              updatedEntry._id
-            );
-          }
+    const enteredPage = Number(pageInput);
+
+    if (!Number.isFinite(enteredPage)) {
+      setActionMessage("Please enter a valid page number");
+      return;
+    }
+
+    const clampedPage = Math.max(
+      0,
+      totalPages > 0
+        ? Math.min(Math.floor(enteredPage), totalPages)
+        : Math.floor(enteredPage)
+    );
+
+    setProgressSaving(true);
+    setActionMessage("");
+
+    try {
+      let updatedEntry;
+
+      if (localLibraryEntryId) {
+        updatedEntry = await api.updateLibraryEntry(book.id, {
+          currentPage: clampedPage,
+        });
+      } else {
+        updatedEntry = await api.addToLibrary({
+          bookId: book.id,
+          status: "currently",
+          currentPage: clampedPage,
+        });
+
+        setLocalStatus("currently");
+
+        if (updatedEntry?._id) {
+          setLocalLibraryEntryId(updatedEntry._id);
         }
-
-        const savedPage =
-          Number(
-            updatedEntry?.currentPage
-          ) || clampedPage;
-
-        setCurrentPage(
-          savedPage
-        );
-
-        setPageInput(
-          String(savedPage)
-        );
-
-        if (
-          updatedEntry?.status
-        ) {
-          setLocalStatus(
-            updatedEntry.status
-          );
-        }
-
-        if (onLibraryChange) {
-          onLibraryChange(
-            updatedEntry,
-            null,
-            true
-          );
-        }
-
-        setActionMessage(
-          "Reading progress saved"
-        );
-      } catch (error) {
-        console.error(
-          "READING PROGRESS UPDATE FAILED:",
-          error
-        );
-
-        setActionMessage(
-          error.message ||
-            "Could not save reading progress"
-        );
-      } finally {
-        setProgressSaving(
-          false
-        );
-      }
-    };
-
-  const handlePageInputKeyDown =
-    (event) => {
-      if (event.key === "Enter") {
-        handleProgressSave();
-      }
-    };
-
-  const handleRemove =
-    async () => {
-      if (
-        !localLibraryEntryId ||
-        actionLoading ||
-        !book.id
-      ) {
-        return;
       }
 
-      setActionLoading(true);
-      setActionMessage("");
+      const savedPage =
+        Number(updatedEntry?.currentPage) || clampedPage;
 
-      try {
-        await api.removeFromLibrary(
-          book.id
-        );
+      setCurrentPage(savedPage);
+      setPageInput(String(savedPage));
 
-        setLocalStatus(null);
-        setLocalLibraryEntryId(
-          null
-        );
-        setCurrentPage(0);
-        setPageInput("0");
-
-        if (onLibraryChange) {
-          onLibraryChange(
-            null,
-            book.id
-          );
-        }
-
-        setActionMessage(
-          "Removed from your library"
-        );
-      } catch (error) {
-        console.error(
-          "REMOVE FAILED:",
-          error
-        );
-
-        setActionMessage(
-          error.message ||
-            "Could not remove this book"
-        );
-      } finally {
-        setActionLoading(false);
+      if (updatedEntry?.status) {
+        setLocalStatus(updatedEntry.status);
       }
-    };
 
-  const handleRating = async (
-    value
-  ) => {
+      if (onLibraryChange) {
+        onLibraryChange(updatedEntry, null, true);
+      }
+
+      setActionMessage("Reading progress saved");
+    } catch (error) {
+      console.error(
+        "READING PROGRESS UPDATE FAILED:",
+        error
+      );
+
+      setActionMessage(
+        error.message || "Could not save reading progress"
+      );
+    } finally {
+      setProgressSaving(false);
+    }
+  };
+
+  const handlePageInputKeyDown = (event) => {
+    if (event.key === "Enter") {
+      handleProgressSave();
+    }
+  };
+
+  const handleRemove = async () => {
+    if (
+      !localLibraryEntryId ||
+      actionLoading ||
+      !book.id
+    ) {
+      return;
+    }
+
+    setActionLoading(true);
+    setActionMessage("");
+
+    try {
+      await api.removeFromLibrary(book.id);
+
+      setLocalStatus(null);
+      setLocalLibraryEntryId(null);
+      setCurrentPage(0);
+      setPageInput("0");
+
+      if (onLibraryChange) {
+        onLibraryChange(null, book.id);
+      }
+
+      setActionMessage("Removed from your library");
+    } catch (error) {
+      console.error("REMOVE FAILED:", error);
+
+      setActionMessage(
+        error.message || "Could not remove this book"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRating = async (value) => {
     if (
       actionLoading ||
       progressSaving ||
@@ -476,233 +298,152 @@ export default function BookModal({
     try {
       let updatedEntry;
 
-      if (
-        localLibraryEntryId
-      ) {
-        updatedEntry =
-          await api.updateLibraryEntry(
-            book.id,
-            {
-              rating: value,
-            }
-          );
+      if (localLibraryEntryId) {
+        updatedEntry = await api.updateLibraryEntry(book.id, {
+          rating: value,
+        });
       } else {
-        updatedEntry =
-          await api.addToLibrary({
-            bookId: book.id,
-            status: "tbr",
-            rating: value,
-          });
+        updatedEntry = await api.addToLibrary({
+          bookId: book.id,
+          status: "tbr",
+          rating: value,
+        });
 
         setLocalStatus("tbr");
 
-        if (
-          updatedEntry?._id
-        ) {
-          setLocalLibraryEntryId(
-            updatedEntry._id
-          );
+        if (updatedEntry?._id) {
+          setLocalLibraryEntryId(updatedEntry._id);
         }
       }
 
       if (onLibraryChange) {
-        onLibraryChange(
-          updatedEntry
-        );
+        onLibraryChange(updatedEntry, null, true);
       }
     } catch (error) {
-      console.error(
-        "RATING FAILED:",
-        error
-      );
+      console.error("RATING FAILED:", error);
 
       setActionMessage(
-        error.message ||
-          "Could not save rating"
+        error.message || "Could not save rating"
       );
     }
   };
 
-  const handleReview =
-    async () => {
-      const trimmedReview =
-        review.trim();
+  const handleReview = async () => {
+    const trimmedReview = review.trim();
 
-      if (
-        !trimmedReview ||
-        rating === 0 ||
-        reviewSaving ||
-        !book.id
-      ) {
-        return;
+    if (
+      !trimmedReview ||
+      rating === 0 ||
+      reviewSaving ||
+      !book.id
+    ) {
+      return;
+    }
+
+    setReviewSaving(true);
+    setActionMessage("");
+
+    try {
+      const saved = await api.saveReview({
+        bookId: book.id,
+        rating,
+        text: trimmedReview,
+      });
+
+      setSavedReview(saved);
+
+      setReview(saved?.text || trimmedReview);
+
+      if (saved?.rating) {
+        setRating(Number(saved.rating));
       }
 
-      setReviewSaving(true);
-      setActionMessage("");
+      if (saved?.rating && onLibraryChange) {
+        if (localLibraryEntryId) {
+          const updatedEntry =
+            await api.updateLibraryEntry(book.id, {
+              rating: Number(saved.rating),
+            });
 
-      try {
-        const saved =
-          await api.saveReview({
-            bookId: book.id,
-            rating,
-            text: trimmedReview,
-          });
-
-        setSavedReview(saved);
-
-        setReview(
-          saved?.text ||
-            trimmedReview
-        );
-
-        if (saved?.rating) {
-          setRating(
-            Number(
-              saved.rating
-            )
-          );
+          onLibraryChange(updatedEntry, null, true);
         }
-
-        if (
-          saved?.rating &&
-          onLibraryChange
-        ) {
-          if (
-            localLibraryEntryId
-          ) {
-            const updatedEntry =
-              await api.updateLibraryEntry(
-                book.id,
-                {
-                  rating:
-                    Number(
-                      saved.rating
-                    ),
-                }
-              );
-
-            onLibraryChange(
-              updatedEntry
-            );
-          }
-        }
-
-        const updatedReviews =
-          await api.getBookReviews(
-            book.id
-          );
-
-        setAllReviews(
-          Array.isArray(
-            updatedReviews
-          )
-            ? updatedReviews
-            : []
-        );
-
-        setActionMessage(
-          "Your review has been posted!"
-        );
-      } catch (error) {
-        console.error(
-          "REVIEW SAVE FAILED:",
-          error
-        );
-
-        setActionMessage(
-          error.message ||
-            "Could not post your review"
-        );
-      } finally {
-        setReviewSaving(
-          false
-        );
-      }
-    };
-
-  const handleReviewLike =
-    async (reviewItem) => {
-      if (
-        !reviewItem?._id ||
-        reviewLikeLoading[
-          reviewItem._id
-        ]
-      ) {
-        return;
       }
 
-      const reviewId =
-        reviewItem._id;
+      const updatedReviews =
+        await api.getBookReviews(book.id);
 
-      const isLiked =
-        Boolean(
-          reviewItem.likedByMe
-        );
-
-      setReviewLikeLoading(
-        (current) => ({
-          ...current,
-          [reviewId]: true,
-        })
+      setAllReviews(
+        Array.isArray(updatedReviews)
+          ? updatedReviews
+          : []
       );
 
-      try {
-        const result = isLiked
-          ? await api.unlikeReview(
-              reviewId
-            )
-          : await api.likeReview(
-              reviewId
-            );
+      setActionMessage("Your review has been posted!");
+    } catch (error) {
+      console.error("REVIEW SAVE FAILED:", error);
 
-        setAllReviews(
-          (currentReviews) =>
-            currentReviews.map(
-              (item) =>
-                String(
-                  item._id
-                ) ===
-                String(reviewId)
-                  ? {
-                      ...item,
-                      likedByMe:
-                        Boolean(
-                          result.liked
-                        ),
-                      likes:
-                        Number(
-                          result.likes
-                        ) || 0,
-                    }
-                  : item
-            )
-        );
-      } catch (error) {
-        console.error(
-          "REVIEW LIKE FAILED:",
-          error
-        );
+      setActionMessage(
+        error.message || "Could not post your review"
+      );
+    } finally {
+      setReviewSaving(false);
+    }
+  };
 
-        setActionMessage(
-          error.message ||
-            "Could not update review like"
-        );
-      } finally {
-        setReviewLikeLoading(
-          (current) => ({
-            ...current,
-            [reviewId]: false,
-          })
-        );
-      }
-    };
+  const handleReviewLike = async (reviewItem) => {
+    if (
+      !reviewItem?._id ||
+      reviewLikeLoading[reviewItem._id]
+    ) {
+      return;
+    }
 
-  const isTbr =
-    localStatus === "tbr";
+    const reviewId = reviewItem._id;
+
+    const isLiked = Boolean(reviewItem.likedByMe);
+
+    setReviewLikeLoading((current) => ({
+      ...current,
+      [reviewId]: true,
+    }));
+
+    try {
+      const result = isLiked
+        ? await api.unlikeReview(reviewId)
+        : await api.likeReview(reviewId);
+
+      setAllReviews((currentReviews) =>
+        currentReviews.map((item) =>
+          String(item._id) === String(reviewId)
+            ? {
+                ...item,
+                likedByMe: Boolean(result.liked),
+                likes: Number(result.likes) || 0,
+              }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error(
+        "REVIEW LIKE FAILED:",
+        error
+      );
+
+      setActionMessage(
+        error.message || "Could not update review like"
+      );
+    } finally {
+      setReviewLikeLoading((current) => ({
+        ...current,
+        [reviewId]: false,
+      }));
+    }
+  };
+
+  const isTbr = localStatus === "tbr";
 
   const isCurrentlyReading =
-    localStatus ===
-    "currently";
+    localStatus === "currently";
 
   return (
     <div
@@ -711,9 +452,7 @@ export default function BookModal({
     >
       <section
         className={`book-modal ${
-          blurb
-            ? "show-blurb"
-            : ""
+          blurb ? "show-blurb" : ""
         }`}
         onClick={(event) =>
           event.stopPropagation()
@@ -735,22 +474,14 @@ export default function BookModal({
 
           <div className="cover-page-copy">
             <p className="eyebrow">
-              {Array.isArray(
-                book.genre
-              )
-                ? book.genre.join(
-                    " · "
-                  )
+              {Array.isArray(book.genre)
+                ? book.genre.join(" · ")
                 : book.genre}
             </p>
 
-            <h2>
-              {book.title}
-            </h2>
+            <h2>{book.title}</h2>
 
-            <p>
-              {book.author}
-            </p>
+            <p>{book.author}</p>
 
             <button
               className="primary-btn"
@@ -759,9 +490,7 @@ export default function BookModal({
               }
             >
               Read the blurb
-              <ChevronRight
-                size={17}
-              />
+              <ChevronRight size={17} />
             </button>
           </div>
         </div>
@@ -773,9 +502,7 @@ export default function BookModal({
             A little about this book
           </p>
 
-          <h2>
-            {book.title}
-          </h2>
+          <h2>{book.title}</h2>
 
           <p className="blurb">
             {book.blurb}
@@ -785,14 +512,10 @@ export default function BookModal({
             <button
               className="community-btn"
               onClick={() =>
-                setCommentsOpen(
-                  true
-                )
+                setCommentsOpen(true)
               }
             >
-              <MessageCircle
-                size={17}
-              />
+              <MessageCircle size={17} />
               Comments
             </button>
           </div>
@@ -800,15 +523,12 @@ export default function BookModal({
           <div className="library-actions">
             <button
               className={`library-action ${
-                localStatus ===
-                "tbr"
+                localStatus === "tbr"
                   ? "active"
                   : ""
               }`}
               onClick={() =>
-                updateLibrary(
-                  "tbr"
-                )
+                updateLibrary("tbr")
               }
               disabled={
                 actionLoading ||
@@ -816,25 +536,18 @@ export default function BookModal({
                 isTbr
               }
             >
-              <BookmarkPlus
-                size={16}
-              />
-              {isTbr
-                ? "In TBR"
-                : "TBR"}
+              <BookmarkPlus size={16} />
+              {isTbr ? "In TBR" : "TBR"}
             </button>
 
             <button
               className={`library-action ${
-                localStatus ===
-                "currently"
+                localStatus === "currently"
                   ? "active"
                   : ""
               }`}
               onClick={() =>
-                updateLibrary(
-                  "currently"
-                )
+                updateLibrary("currently")
               }
               disabled={
                 actionLoading ||
@@ -847,15 +560,12 @@ export default function BookModal({
 
             <button
               className={`library-action ${
-                localStatus ===
-                "read"
+                localStatus === "read"
                   ? "active"
                   : ""
               }`}
               onClick={() =>
-                updateLibrary(
-                  "read"
-                )
+                updateLibrary("read")
               }
               disabled={
                 actionLoading ||
@@ -875,8 +585,7 @@ export default function BookModal({
                 </span>
 
                 <span className="modal-reading-progress-percent">
-                  {progressPercentage}
-                  %
+                  {progressPercentage}%
                 </span>
               </div>
 
@@ -892,8 +601,7 @@ export default function BookModal({
               <div className="modal-reading-progress-meta">
                 <span>
                   {currentPage}{" "}
-                  {totalPages >
-                  0
+                  {totalPages > 0
                     ? `of ${totalPages} pages`
                     : "pages read"}
                 </span>
@@ -905,20 +613,14 @@ export default function BookModal({
                   type="number"
                   min="0"
                   max={
-                    totalPages >
-                    0
+                    totalPages > 0
                       ? totalPages
                       : undefined
                   }
-                  value={
-                    pageInput
-                  }
-                  onChange={(
-                    event
-                  ) =>
+                  value={pageInput}
+                  onChange={(event) =>
                     setPageInput(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   onKeyDown={
@@ -954,9 +656,7 @@ export default function BookModal({
           {localLibraryEntryId && (
             <button
               className="remove-library-btn"
-              onClick={
-                handleRemove
-              }
+              onClick={handleRemove}
               disabled={
                 actionLoading ||
                 progressSaving
@@ -974,18 +674,14 @@ export default function BookModal({
                 setBlurb(false)
               }
             >
-              <ChevronLeft
-                size={16}
-              />
+              <ChevronLeft size={16} />
               Cover
             </button>
 
             <button
               className="primary-btn"
               onClick={() =>
-                updateLibrary(
-                  "tbr"
-                )
+                updateLibrary("tbr")
               }
               disabled={
                 actionLoading ||
@@ -993,9 +689,7 @@ export default function BookModal({
                 isTbr
               }
             >
-              <BookmarkPlus
-                size={16}
-              />
+              <BookmarkPlus size={16} />
               {isTbr
                 ? "In my TBR"
                 : "Add to TBR"}
@@ -1005,19 +699,11 @@ export default function BookModal({
 
         <div className="modal-dots">
           <span
-            className={
-              !blurb
-                ? "on"
-                : ""
-            }
+            className={!blurb ? "on" : ""}
           ></span>
 
           <span
-            className={
-              blurb
-                ? "on"
-                : ""
-            }
+            className={blurb ? "on" : ""}
           ></span>
         </div>
 
@@ -1025,9 +711,7 @@ export default function BookModal({
           <div
             className="comments-overlay"
             onClick={() =>
-              setCommentsOpen(
-                false
-              )
+              setCommentsOpen(false)
             }
           >
             <div
@@ -1050,9 +734,7 @@ export default function BookModal({
                 <button
                   className="comments-close"
                   onClick={() =>
-                    setCommentsOpen(
-                      false
-                    )
+                    setCommentsOpen(false)
                   }
                   aria-label="Close reviews"
                 >
@@ -1071,15 +753,12 @@ export default function BookModal({
                       <button
                         key={star}
                         className={`star-button ${
-                          star <=
-                          rating
+                          star <= rating
                             ? "selected"
                             : ""
                         }`}
                         onClick={() =>
-                          handleRating(
-                            star
-                          )
+                          handleRating(star)
                         }
                         disabled={
                           reviewSaving
@@ -1089,8 +768,7 @@ export default function BookModal({
                         <Star
                           size={21}
                           fill={
-                            star <=
-                            rating
+                            star <= rating
                               ? "currentColor"
                               : "none"
                           }
@@ -1103,15 +781,10 @@ export default function BookModal({
 
               <div className="review-form">
                 <textarea
-                  value={
-                    review
-                  }
-                  onChange={(
-                    event
-                  ) =>
+                  value={review}
+                  onChange={(event) =>
                     setReview(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   placeholder="What did you think about this book?"
@@ -1124,9 +797,7 @@ export default function BookModal({
 
                 <button
                   className="primary-btn"
-                  onClick={
-                    handleReview
-                  }
+                  onClick={handleReview}
                   disabled={
                     reviewLoading ||
                     reviewSaving ||
@@ -1155,13 +826,11 @@ export default function BookModal({
                       Loading reviews...
                     </p>
                   </div>
-                ) : allReviews.length >
-                  0 ? (
+                ) : allReviews.length > 0 ? (
                   allReviews.map(
                     (item) => {
                       const username =
-                        item.user
-                          ?.username ||
+                        item.user?.username ||
                         "BookNest reader";
 
                       const reviewRating =
@@ -1202,9 +871,7 @@ export default function BookModal({
                               ? "own-review"
                               : ""
                           }`}
-                          key={
-                            item._id
-                          }
+                          key={item._id}
                         >
                           <div className="review-top">
                             <strong>
@@ -1215,9 +882,7 @@ export default function BookModal({
 
                             <div className="mini-stars">
                               {[1, 2, 3, 4, 5].map(
-                                (
-                                  star
-                                ) => (
+                                (star) => (
                                   <Star
                                     key={
                                       star
@@ -1238,9 +903,7 @@ export default function BookModal({
                           </div>
 
                           <p>
-                            {
-                              item.text
-                            }
+                            {item.text}
                           </p>
 
                           {!isOwnReview && (
@@ -1265,9 +928,7 @@ export default function BookModal({
                               }
                             >
                               <Heart
-                                size={
-                                  15
-                                }
+                                size={15}
                                 fill={
                                   liked
                                     ? "currentColor"
@@ -1280,18 +941,13 @@ export default function BookModal({
                           )}
 
                           {isOwnReview &&
-                            likeCount >
-                              0 && (
+                            likeCount > 0 && (
                               <span className="review-like-count">
                                 <Heart
-                                  size={
-                                    14
-                                  }
+                                  size={14}
                                   fill="currentColor"
                                 />
-                                {
-                                  likeCount
-                                }
+                                {likeCount}
                               </span>
                             )}
                         </div>

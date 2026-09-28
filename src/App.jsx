@@ -155,6 +155,15 @@ export default function App() {
 
   const [onboardingStep, setOnboardingStep] =
     useState(() => {
+      const activeSession =
+        sessionStorage.getItem(
+          "booknestSession"
+        );
+
+      if (!activeSession) {
+        return "login";
+      }
+
       if (!existingUser) {
         return "login";
       }
@@ -551,6 +560,11 @@ export default function App() {
   const handleLoginComplete = (
     user
   ) => {
+    sessionStorage.setItem(
+      "booknestSession",
+      "true"
+    );
+
     setUserLibrary([]);
     setSection("home");
     setQuery("");
@@ -603,6 +617,10 @@ export default function App() {
 
     localStorage.removeItem(
       "booknestRatings"
+    );
+
+    sessionStorage.removeItem(
+      "booknestSession"
     );
 
     setUserLibrary([]);
@@ -985,6 +1003,7 @@ export default function App() {
             subtitle="Waiting patiently"
             items={tbr}
             onOpen={setModal}
+            reverse
           />
         ) : section === "recommendations" ? (
           <RecommendationsPage
@@ -1073,6 +1092,7 @@ export default function App() {
               subtitle="The pile keeps growing"
               items={tbr}
               onOpen={setModal}
+              reverse
             />
 
             <Shelf
